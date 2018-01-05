@@ -211,7 +211,9 @@ check_init_gerrit() {
 # Initialize Gerrit
 if ! [ -f ${GERRIT_SITE}/etc/gerrit.config ];then
     echo -ne "initialize gerrit ..."
-    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init --batch --no-auto-start -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
+    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init \
+        --batch --no-auto-start --install-all-plugins \
+        -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
     local ret=$?
     [ $ret -eq 0 ] && gen_version && return $ret
     echo -ne "\b\b\bFailed!"
@@ -219,21 +221,25 @@ fi
 }
 
 check_update_gerrit() {
-    echo "Checking gerrit version"
-    local old_version="v$(cat ${GERRIT_VERSIONFILE})"
-    local cur_version="v${GERRIT_VERSION}"
-    [ "${old_version}" = "${cur_version}" ] && return
-
-    #there is new gerrit version, download it
-    echo "Upgrading gerrit..."
-    ${GERRIT_HOME}/fetch_gerrit.sh gerrit
-    # gerrit version update and redinex
     check_init_gerrit
+
+    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init \
+        --batch --no-auto-start \
+        -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
     if ! [ $? -ne 0 ]; then
         echo "Something wrong..."
         cat "${GERRIT_SITE}/logs/error_log"
     fi
 
+    echo "Checking gerrit version"
+    local old_version="v$(cat ${GERRIT_VERSIONFILE})"
+    local cur_version="v${GERRIT_VERSION}"
+    [ "${old_version}" = "${cur_version}" ] && return
+    #there is new gerrit version, download it
+    echo "Upgrading gerrit..."
+    ${GERRIT_HOME}/fetch_gerrit.sh gerrit
+
+    # gerrit version update and redinex
     [ -n "${IGNORE_VERSIONCHECK}" ] && return
     echo "Reindexing..."
     gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" reindex --verbose -d "${GERRIT_SITE}"
