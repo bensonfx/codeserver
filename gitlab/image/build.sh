@@ -25,16 +25,15 @@ init_deps() {
 }
 
 add_zh_patch() {
-    echo " # Generating translation patch ..."
-    cd /tmp
-    git clone ${GITLAB_ZH_GIT} gitlab
-    cd gitlab
-    export IGNORE_DIRS=':!spec :!features :!.gitignore :!locale :!app/assets/javascripts/locale'
-    git diff ${GITLAB_VERSION}..${GITLAB_ZH_VERSION} -- .  ${IGNORE_DIRS} > ../zh_CN.diff
+    # echo " # Generating translation patch ..."
+    # git clone ${GITLAB_ZH_GIT} /tmp/gitlab
+    # cd /tmp/gitlab
+    # export IGNORE_DIRS=':!spec :!features :!.gitignore :!locale :!app/assets/javascripts/locale'
+    # git diff ${GITLAB_VERSION}..${GITLAB_ZH_VERSION} -- .  ${IGNORE_DIRS} > /tmp/${GITLAB_VERSION}_zh_CN.diff
     echo " # Patching ..."
-    patch -d ${GITLAB_DIR} -p1 < ../zh_CN.diff
-    echo " # Copy locale files ..."
-    cp -R locale ${GITLAB_DIR}/
+    patch -d ${GITLAB_DIR} -p1 < /tmp/patch_${GITLAB_VERSION}_zh_CN.diff
+    # echo " # Copy locale files ..."
+    # cp -R /tmp/locale ${GITLAB_DIR}/
 }
 
 # Reference: https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/config/software/gitlab-rails.rb
@@ -44,6 +43,7 @@ install_assets() {
     cp config/gitlab.yml.example config/gitlab.yml
     cp config/database.yml.postgresql config/database.yml
     cp config/secrets.yml.example config/secrets.yml
+    rm -rf public/assets
     export NODE_ENV=production
     export RAILS_ENV=production
     export SETUP_DB=false
@@ -52,9 +52,8 @@ install_assets() {
     export WEBPACK_REPORT=true
     export NO_COMPRESSION=true
     export NO_PRIVILEGE_DROP=true
-    bundle exec rake gettext:pack
-    bundle exec rake gettext:po_to_json
-    yarn install --production --pure-lockfile
+    yarn install --frozen-lockfile
+    bundle exec rake gettext:compile
     bundle exec rake gitlab:assets:compile
 }
 
