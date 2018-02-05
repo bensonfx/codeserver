@@ -13,6 +13,10 @@ set_gitiles_config() {
   gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/gitiles.config" "$@"
 }
 
+install_plugin() {
+  local plugin=$1
+  [ -f ${GERRIT_SITE}/plugins/${plugin} ] || gosu ${GERRIT_USER} cp -f ${GERRIT_HOME}/${plugin} ${GERRIT_SITE}/plugins/
+}
 wait_for_database() {
   echo "Waiting for database connection $1:$2 ..."
   until nc -z $1 $2; do
@@ -108,7 +112,7 @@ init_auth() {
 
     #Section OAUTH general
     if [ "${AUTH_TYPE}" = 'OAUTH' ]  ; then
-        gosu ${GERRIT_USER} cp -f ${GERRIT_HOME}/gerrit-oauth-provider.jar ${GERRIT_SITE}/plugins/gerrit-oauth-provider.jar
+        install_plugin "gerrit-oauth-provider.jar"
         [ -z "${OAUTH_ALLOW_EDIT_FULL_NAME}" ]     || set_gerrit_config oauth.allowEditFullName "${OAUTH_ALLOW_EDIT_FULL_NAME}"
         [ -z "${OAUTH_ALLOW_REGISTER_NEW_EMAIL}" ] || set_gerrit_config oauth.allowRegisterNewEmail "${OAUTH_ALLOW_REGISTER_NEW_EMAIL}"
 
@@ -187,6 +191,7 @@ init_plugins() {
     #Section gitweb
     case "$GITWEB_TYPE" in
         "gitiles")
+            install_plugin gitiles.jar
             set_gitiles_config gerrit.linkname $GITWEB_TYPE
             set_gitiles_config gerrit.target _self
             set_gitiles_config gitweb.type $GITWEB_TYPE
@@ -194,9 +199,9 @@ init_plugins() {
         "") # Gitweb by default
             set_gerrit_config gitweb.cgi "/usr/share/gitweb/gitweb.cgi"
             export GITWEB_TYPE=gitweb
-            set_gerrit_config gitweb.type "$GITWEB_TYPE"
             ;;
     esac
+    set_gerrit_config gitweb.type "$GITWEB_TYPE"
 }
 
 gen_version() {
@@ -215,21 +220,17 @@ if ! [ -f ${GERRIT_SITE}/etc/gerrit.config ];then
         --batch --no-auto-start --install-all-plugins \
         -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
     local ret=$?
-    [ $ret -eq 0 ] && gen_version && return $ret
-    echo -ne "\b\b\bFailed!"
+    if [ $ret -eq 0 ];then
+        gen_version
+    else
+        echo -ne "init gerrit Failed!"
+    fi
+    return $ret
 fi
 }
 
 check_update_gerrit() {
     check_init_gerrit
-
-    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init \
-        --batch --no-auto-start \
-        -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
-    if ! [ $? -ne 0 ]; then
-        echo "Something wrong..."
-        cat "${GERRIT_SITE}/logs/error_log"
-    fi
 
     echo "Checking gerrit version"
     local old_version="v$(cat ${GERRIT_VERSIONFILE})"
@@ -238,6 +239,14 @@ check_update_gerrit() {
     #there is new gerrit version, download it
     echo "Upgrading gerrit..."
     ${GERRIT_HOME}/fetch_gerrit.sh gerrit
+
+    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init \
+        --batch --no-auto-start \
+        -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
+    if [ $? -ne 0 ]; then
+        echo "Something wrong..."
+        cat "${GERRIT_SITE}/logs/error_log"
+    fi
 
     # gerrit version update and redinex
     [ -n "${IGNORE_VERSIONCHECK}" ] && return
