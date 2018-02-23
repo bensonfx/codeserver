@@ -2,7 +2,7 @@
 set -ex
 export LC_ALL=C
 
-VER=${DOCKER_LAM_VER:-6.2}
+VER=${DOCKER_LAM_VER:-6.2.1}
 LAM_PKG=ldap-account-manager-${VER}.tar.bz2
 LAM_URL=http://prdownloads.sourceforge.net/lam/${LAM_PKG}?download
 LAM_DIR=${DOCKER_LAM_DIR:-"/wwwroot/lam"}
@@ -13,7 +13,7 @@ init_deps() {
 }
 
 download_extract_lam() {
-    curl -sSL ${LAM_URL} -o /tmp/${LAM_PKG}
+    curl -L ${LAM_URL} -o /tmp/${LAM_PKG}
     tar xf /tmp/${LAM_PKG}
 }
 
