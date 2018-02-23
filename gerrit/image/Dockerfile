@@ -12,15 +12,13 @@ ENV GERRIT_SITE=${GERRIT_HOME}/review_site \
 
 # Ensure the entrypoint scripts are in a fixed location
 COPY gerrit-start.sh fetch_gerrit.sh ${GERRIT_HOME}/
-COPY gosu /usr/bin
-
 #&& curl -fSsL https://gerrit-releases.storage.googleapis.com/gerrit-${GERRIT_VERSION}.war -o ${TMP_GERRIT_WAR} \
 RUN set -xe \
     && echo " # Preparing ..." \
     # && sed -i "s@http://archive.ubuntu.com@http://cn.archive.ubuntu.com@g" /etc/apt/sources.list \
     && sed -i "s@http://archive.ubuntu.com@http://mirrors.aliyun.com@g" /etc/apt/sources.list \
     && useradd -Ulms /sbin/nologin ${GERRIT_USER} \
-    && chmod a+x ${GERRIT_HOME}/*.sh /usr/bin/gosu \
+    && chmod a+x ${GERRIT_HOME}/*.sh \
     && mkdir /entrypoint-init.d \
     && chown -R ${GERRIT_USER} ${GERRIT_HOME} \
     && apt-get update \
