@@ -5,7 +5,7 @@ DEBIAN_FRONTEND=noninteractive
 GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
 GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
 IMPORTER_PLUGIN_VERSION=bazel-master
-GITILES_PLUGIN_VERSION=bazel-master-stable-2.15
+GITILES_PLUGIN_VERSION=stable-2.15
 DELPROJ_PLUGIN_VERSION=bazel-stable-2.15
 EVENTSLOG_PLUGIN_VERSION=bazel-master
 GERRIT_OAUTH_URL="https://github.com/davido/gerrit-oauth-provider/releases"
@@ -27,7 +27,7 @@ fetch_plugins() {
         ${GERRITFORGE_URL}/job/plugin-events-log-${EVENTSLOG_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/events-log/events-log.jar \
         -o ${GERRIT_HOME}/events-log.jar
     curl -fSsL \
-        ${GERRITFORGE_URL}/job/plugin-gitiles-${GITILES_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/gitiles/gitiles.jar \
+        ${GERRITFORGE_URL}/job/plugin-gitiles-bazel-${GITILES_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/gitiles/gitiles.jar \
         -o ${GERRIT_HOME}/gitiles.jar
     curl -fSsL \
         ${GERRITFORGE_URL}/job/plugin-importer-${IMPORTER_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/importer/importer.jar \
