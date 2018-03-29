@@ -36,12 +36,15 @@ fetch_plugins() {
     local GERRIT_OAUTH_PLUGIN=$(curl -ksSL ${GERRIT_OAUTH_URL} | grep -oE "download/v[0-9.]+/gerrit-oauth-provider.jar"| head -n 1)
     curl -fSsL \
         ${GERRIT_OAUTH_URL}/${GERRIT_OAUTH_PLUGIN} -o ${GERRIT_HOME}/gerrit-oauth-provider.jar
+    # local GERRIT_OAUTH_PLUGIN=$(curl -ksSL ${GERRIT_OAUTH_URL} | grep -oE "download/v[0-9.]+/gerrit-oauth-provider.jar"| head -n 1)
+    # curl -L \
+    #     ${GERRIT_OAUTH_URL}/${GERRIT_OAUTH_PLUGIN} -o ${GERRIT_HOME}/gerrit-oauth-provider.jar
 }
 
 fetch_gerrit_war() {
     curl -fsSL http://repo1.maven.org/maven2/com/google/gerrit/gerrit-war/${GERRIT_VERSION}/gerrit-war-${GERRIT_VERSION}.war \
         -o ${GERRIT_WAR}
-    fetch_gosu
+    #fetch_gosu
 }
 
 case $1 in
