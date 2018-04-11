@@ -3,30 +3,23 @@
 set -ex
 DEBIAN_FRONTEND=noninteractive
 GERRIT_WAR_URL="http://repo1.maven.org/maven2/com/google/gerrit/gerrit-war/${GERRIT_VERSION}/gerrit-war-${GERRIT_VERSION}.war"
-
-GERRIT_OAUTH_URL="https://github.com/davido/gerrit-oauth-provider/releases"
 GOSU_URL="https://github.com/tianon/gosu/releases"
 
-GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
-PLUGIN_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
-
 #################### plugin define ####################
+GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
+PLUGIN_ARTIFACT_URI=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
+GERRIT_OAUTH_URL="https://github.com/davido/gerrit-oauth-provider/releases"
+
 plugin_list="IMPORTER GITILES DELPROJ EVENTSLOG LFS"
+suffix=$(echo ${GERRIT_VERSION} | sed -r "s@([0-9]\.[0-9]+).*@\1@g")
 
 IMPORTER_NAME=importer
-IMPORTER_VERSION=bazel-master
-
 GITILES_NAME=gitiles
-GITILES_VERSION=stable-2.15
-
 DELPROJ_NAME=delete-project
-DELPROJ_VERSION=bazel-stable-2.15
-
 EVENTSLOG_NAME=events-log
-EVENTSLOG_VERSION=bazel-master
-
 LFS_NAME=lfs
-LFS_VERSION=bazel-master
+
+OAUTH_NAME=gerrit-oauth-provider
 ################## plugin define end ##################
 
 clean() {
@@ -56,14 +49,17 @@ fetch_gosu() {
 
 fetch_plugins() {
     for PLUGIN in ${plugin_list};do
-        eval echo "downloading plugin:\$${PLUGIN}_NAME"
-        eval curl -L ${GERRITFORGE_URL}/job/plugin-\${${PLUGIN}_NAME}-\${${PLUGIN}_VERSION}/${PLUGIN_ARTIFACT_DIR}/\${${PLUGIN}_NAME}/\${${PLUGIN}_NAME}.jar \
-            -o ${GERRIT_HOME}/\${${PLUGIN}_NAME}.jar
+        eval local version=\${${PLUGIN}_VERSION:=bazel-stable-$suffix}
+        eval local name=\${${PLUGIN}_NAME}
+        local plugin_url=${GERRITFORGE_URL}/job/plugin-${name}-${version}/${PLUGIN_ARTIFACT_URI}/${name}/${name}.jar
+
+        echo "downloading plugin:${name}"
+        curl -L ${plugin_url} -o ${GERRIT_HOME}/${name}.jar
     done
 
-    # local GERRIT_OAUTH_PLUGIN=$(curl -ksSL ${GERRIT_OAUTH_URL} | grep -oE "download/v[0-9.]+/gerrit-oauth-provider.jar"| head -n 1)
+    # local GERRIT_OAUTH_PLUGIN=$(curl -ksSL ${GERRIT_OAUTH_URL} | grep -oE "download/v[0-9.]+/${OAUTH_NAME}.jar"| head -n 1)
     # curl -L \
-    #     ${GERRIT_OAUTH_URL}/${GERRIT_OAUTH_PLUGIN} -o ${GERRIT_HOME}/gerrit-oauth-provider.jar
+    #     ${GERRIT_OAUTH_URL}/${GERRIT_OAUTH_PLUGIN} -o ${GERRIT_HOME}/${OAUTH_NAME}.jar
 }
 
 fetch_gerrit_war() {
