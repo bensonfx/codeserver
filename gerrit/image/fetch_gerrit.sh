@@ -4,16 +4,30 @@ set -ex
 DEBIAN_FRONTEND=noninteractive
 GERRIT_WAR_URL="http://repo1.maven.org/maven2/com/google/gerrit/gerrit-war/${GERRIT_VERSION}/gerrit-war-${GERRIT_VERSION}.war"
 
-GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
-GERRITFORGE_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
-IMPORTER_PLUGIN_VERSION=bazel-master
-GITILES_PLUGIN_VERSION=stable-2.15
-DELPROJ_PLUGIN_VERSION=bazel-stable-2.15
-EVENTSLOG_PLUGIN_VERSION=bazel-master
 GERRIT_OAUTH_URL="https://github.com/davido/gerrit-oauth-provider/releases"
 GOSU_URL="https://github.com/tianon/gosu/releases"
 
+GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
+PLUGIN_ARTIFACT_DIR=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
 
+#################### plugin define ####################
+plugin_list="IMPORTER GITILES DELPROJ EVENTSLOG LFS"
+
+IMPORTER_NAME=importer
+IMPORTER_VERSION=bazel-master
+
+GITILES_NAME=gitiles
+GITILES_VERSION=stable-2.15
+
+DELPROJ_NAME=delete-project
+DELPROJ_VERSION=bazel-stable-2.15
+
+EVENTSLOG_NAME=events-log
+EVENTSLOG_VERSION=bazel-master
+
+LFS_NAME=lfs
+LFS_VERSION=bazel-master
+################## plugin define end ##################
 
 clean() {
     rm -rf /var/lib/apt/lists/* /tmp/*
@@ -41,22 +55,12 @@ fetch_gosu() {
 }
 
 fetch_plugins() {
-    curl -fSsL \
-        ${GERRITFORGE_URL}/job/plugin-delete-project-${DELPROJ_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/delete-project/delete-project.jar \
-        -o ${GERRIT_HOME}/delete-project.jar
-    curl -fSsL \
-        ${GERRITFORGE_URL}/job/plugin-events-log-${EVENTSLOG_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/events-log/events-log.jar \
-        -o ${GERRIT_HOME}/events-log.jar
-    curl -fSsL \
-        ${GERRITFORGE_URL}/job/plugin-gitiles-bazel-${GITILES_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/gitiles/gitiles.jar \
-        -o ${GERRIT_HOME}/gitiles.jar
-    curl -fSsL \
-        ${GERRITFORGE_URL}/job/plugin-importer-${IMPORTER_PLUGIN_VERSION}/${GERRITFORGE_ARTIFACT_DIR}/importer/importer.jar \
-        -o ${GERRIT_HOME}/importer.jar
+    for PLUGIN in ${plugin_list};do
+        eval echo "downloading plugin:\$${PLUGIN}_NAME"
+        eval curl -L ${GERRITFORGE_URL}/job/plugin-\${${PLUGIN}_NAME}-\${${PLUGIN}_VERSION}/${PLUGIN_ARTIFACT_DIR}/\${${PLUGIN}_NAME}/\${${PLUGIN}_NAME}.jar \
+            -o ${GERRIT_HOME}/\${${PLUGIN}_NAME}.jar
+    done
 
-    local GERRIT_OAUTH_PLUGIN=$(curl -ksSL ${GERRIT_OAUTH_URL} | grep -oE "download/v[0-9.]+/gerrit-oauth-provider.jar"| head -n 1)
-    curl -fSsL \
-        ${GERRIT_OAUTH_URL}/${GERRIT_OAUTH_PLUGIN} -o ${GERRIT_HOME}/gerrit-oauth-provider.jar
     # local GERRIT_OAUTH_PLUGIN=$(curl -ksSL ${GERRIT_OAUTH_URL} | grep -oE "download/v[0-9.]+/gerrit-oauth-provider.jar"| head -n 1)
     # curl -L \
     #     ${GERRIT_OAUTH_URL}/${GERRIT_OAUTH_PLUGIN} -o ${GERRIT_HOME}/gerrit-oauth-provider.jar
@@ -69,6 +73,7 @@ fetch_gerrit_war() {
 }
 
 case $1 in
+
     gerrit)
         fetch_gerrit_war;;
     plugins)
