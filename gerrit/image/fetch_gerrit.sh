@@ -47,7 +47,7 @@ init_env() {
 }
 
 fetch_gosu() {
-    local GOSU_QUERY=$(curl -ksSL ${GOSU_URL} | grep -oE "download/v[0-9.]+/gosu-amd64"| head -n1)
+    local GOSU_QUERY=$(curl -ksSL ${GOSU_URL} | grep -oE "download/[0-9.]+/gosu-amd64"| head -n1)
 
     local GOSU="/usr/bin/gosu"
     curl -Lo $GOSU "${GOSU_URL}/${GOSU_QUERY}"
