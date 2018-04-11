@@ -1,0 +1,31 @@
+#!/bin/sh
+
+CWD=$(pwd)
+GITLAB_VERSION=$(grep -o "GITLAB_VERSION=.*" image/Dockerfile | awk -F = '{print $2}')
+GITLAB_ZH_VERSION=${GITLAB_VERSION}-zh
+PATCH_FILE=${CWD}/image/patch_${GITLAB_VERSION}_zh_CN.diff
+
+gitlab_image_exist() {
+    local prefix=$1
+    echo $(docker images | grep ${prefix}/gitlab-ce | grep -oE ${GITLAB_VERSION})
+}
+
+#fetch latest zh gitlab source
+if [ ! -d ${CWD}/image/gitlab ];then
+    git clone https://gitlab.com/xhang/gitlab ${CWD}/image/gitlab
+fi
+
+cd ${CWD}/image/gitlab
+IGNORE_DIRS=':!spec :!features :!.gitignore :!locale :!app/assets/javascripts/locale'
+git pull
+git diff v${GITLAB_VERSION}..v${GITLAB_ZH_VERSION} -- .  ${IGNORE_DIRS} > ${PATCH_FILE}
+cd -
+
+#build
+docker-compose build gitlab
+
+#remove useless image
+[ -f ${PATCH_FILE} ] && rm ${PATCH_FILE}
+if [ -n "$(gitlab_image_exist bensonfx)" -a -n "$(gitlab_image_exist gitlab)" ];then
+    docker rmi gitlab/gitlab-ce:${GITLAB_VERSION}-ce.0
+fi
