@@ -1,0 +1,53 @@
+version: "2.2"
+services:
+  gerrit:
+    build: "image"
+    image: "bensonfx/gerrit:2.15-rc2"
+    restart: unless-stopped
+    hostname: "review.example.com"
+    depends_on:
+      - ldap
+    environment:
+      TZ: "Asia/Shanghai"
+    ports:
+      - "29418:29418"
+    volumes:
+      - ./review_site:/var/gerrit/review_site
+    mem_limit: 4096M
+  ldap:
+    image: osixia/openldap
+    domainname: "ldap.example.com"
+    hostname: "ldap.example.com"
+    ports:
+      - "389:389"
+    restart: unless-stopped
+    environment:
+      TZ: "Asia/Shanghai"
+      LDAP_ORGANISATION: "Your Comany"
+      LDAP_DOMAIN: "example.com"
+      LDAP_ADMIN_PASSWORD: "your_ldap_password"
+      LDAP_CONFIG_PASSWORD: "your_ldap_passwrd"
+      LDAP_BACKEND: "mdb"
+    volumes:
+      - ./ldap/var:/var/lib/ldap
+      - ./ldap/etc:/etc/ldap/slapd.d
+      - ./certificates:/container/service/slapd/assets/certs
+  proxy:
+    image: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/fastcgi.conf:/etc/nginx/fastcgi.conf
+      - ./nginx/cache:/var/cache/nginx
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/wwwlogs:/wwwlogs
+      - ./wwwroot:/wwwroot
+  lam:
+    build: lam
+    image: bensonfx/lam
+    volumes:
+      - ./wwwroot:/wwwroot
+    working_dir: /wwwroot
