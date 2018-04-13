@@ -2,7 +2,7 @@ version: '2'
 services:
   gitlab:
     build: 'image'
-    image: 'bensonfx/gitlab-ce-zh'
+    image: 'bensonfx/gitlab-ce-zh:10.6.4'
     restart: unless-stopped
     hostname: 'gitlab.example.com'
     environment:
@@ -22,6 +22,8 @@ services:
         gitlab_rails['smtp_tls'] = true
         gitlab_rails['gitlab_email_from'] = 'admin@example.com'
         gitlab_rails['gravatar_plain_url'] = 'http://cn.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon'
+        # nginx['ssl_certificate'] = '/etc/gitlab/ssl/gitlab.crt'
+        # nginx['ssl_certificate_key'] = '/etc/gitlab/ssl/gitlab.key'
     ports:
       - "80:80"
       - "22:22"
