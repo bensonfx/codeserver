@@ -8,7 +8,10 @@ services:
     environment:
       TZ: 'Asia/Shanghai'
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://gitlab.example.com'
+        external_url 'https://gitlab.example.com'
+        nginx['redirect_http_to_https'] = true
+        nginx['ssl_certificate'] = '/etc/gitlab/ssl/gitlab.crt'
+        nginx['ssl_certificate_key'] = '/etc/gitlab/ssl/gitlab.key'
         gitlab_rails['time_zone'] = 'Asia/Shanghai'
         gitlab_rails['smtp_enable'] = true
         gitlab_rails['smtp_address'] = "mail.example.com"
@@ -22,9 +25,8 @@ services:
         gitlab_rails['smtp_tls'] = true
         gitlab_rails['gitlab_email_from'] = 'admin@example.com'
         gitlab_rails['gravatar_plain_url'] = 'http://cn.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon'
-        # nginx['ssl_certificate'] = '/etc/gitlab/ssl/gitlab.crt'
-        # nginx['ssl_certificate_key'] = '/etc/gitlab/ssl/gitlab.key'
     ports:
+      - "443:443"
       - "80:80"
       - "22:22"
     volumes:
