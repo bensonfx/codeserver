@@ -179,6 +179,9 @@ init_base() {
         [ -z "${USER_NAME}" ]             || set_gerrit_config user.name "${USER_NAME}"
         [ -z "${USER_EMAIL}" ]            || set_gerrit_config user.email "${USER_EMAIL}"
         [ -z "${USER_ANONYMOUS_COWARD}" ] || set_gerrit_config user.anonymousCoward "${USER_ANONYMOUS_COWARD}"
+
+    #Section nodeDb
+    set_gerrit_config noteDb.changes.autoMigrate true
 }
 
 init_plugins() {
