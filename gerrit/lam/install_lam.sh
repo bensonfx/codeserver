@@ -32,7 +32,7 @@ compile_lam() {
     rm -rf ${LAM}*
     cd ${LAM_DIR}
     cp config.cfg.sample config.cfg
-    unix.conf.sample lam.conf
+    cp unix.conf.sample lam.conf
 }
 #init_deps
 download_extract_lam
