@@ -8,18 +8,32 @@ LAM_URL=http://prdownloads.sourceforge.net/lam/${LAM_PKG}?download
 LAM_DIR=${DOCKER_LAM_DIR:-"/wwwroot/lam"}
 
 init_deps() {
-    apt-get install -yqq locales tzdata
-    locale-gen zh_CN.UTF-8
+    #apt-get install -yqq locales tzdata
+    #locale-gen zh_CN.UTF-8
+    sed -i 's@dl-cdn.alpinelinux.org@mirrors.aliyun.com@g' /etc/apk/repositories
+    apk add --no-cache --virtual .fetch-deps \
+            openldap-dev zlib-dev \
+            gettext-dev perl
+    apk add --no-cache --virtual .build-deps \
+            coreutils make
+    export PHP_EXT="gettext zip ldap"
+	docker-php-ext-install -j$(nproc) ${PHP_EXT}
+}
+
+clean() {
+    apk del .build-deps
+    rm -rf /tmp/* /var/tmp/*
 }
 
 download_extract_lam() {
     curl -L ${LAM_URL} -o /tmp/${LAM_PKG}
+    cd /tmp
     tar xf /tmp/${LAM_PKG}
 }
 
 compile_lam() {
     [ -d ${LAM_DIR} ] || install -d ${LAM_DIR}
-    local LAM=${LAM_PKG%.tar.bz2}
+    local LAM=/tmp/${LAM_PKG%.tar.bz2}
     cd ${LAM}
     ./configure \
         --with-httpd-user=www-data \
@@ -29,13 +43,13 @@ compile_lam() {
         --sysconfdir=${LAM_DIR}/etc
     make install
     cd -
-    rm -rf ${LAM}*
-    cd ${LAM_DIR}
+    cd ${LAM_DIR}/config
     cp config.cfg.sample config.cfg
     cp unix.conf.sample lam.conf
+    cd -
 }
-#init_deps
+
+init_deps
 download_extract_lam
 compile_lam
-
-exit 0
+clean
