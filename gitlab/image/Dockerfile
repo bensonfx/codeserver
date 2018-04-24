@@ -1,6 +1,6 @@
-FROM gitlab/gitlab-ce:10.6.4-ce.0
+FROM gitlab/gitlab-ce:10.7.1-ce.0
 
-ENV GITLAB_VERSION=10.6.4
+ENV GITLAB_VERSION=10.7.1
 ARG BUILD_SCRIPT=build.sh
 
 COPY ${BUILD_SCRIPT} patch_${GITLAB_VERSION}_zh_CN.diff /tmp/
