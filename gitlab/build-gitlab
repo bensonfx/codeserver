@@ -1,7 +1,11 @@
 #!/bin/sh
 
 CWD=$(pwd)
-GITLAB_VERSION=$(grep -o "GITLAB_VERSION=.*" image/Dockerfile | awk -F = '{print $2}')
+DOCKER_PATH=image/Dockerfile
+GITLAB_ZH_URL=https://gitlab.com/xhang/gitlab
+GITLAB_REPO=${CWD}/image/gitlab
+
+GITLAB_VERSION=$(grep -o "GITLAB_VERSION=.*" ${DOCKER_PATH} | awk -F = '{print $2}')
 GITLAB_ZH_VERSION=${GITLAB_VERSION}-zh
 PATCH_FILE=${CWD}/image/patch_${GITLAB_VERSION}_zh_CN.diff
 
@@ -9,18 +13,18 @@ gitlab_image_exist() {
     local prefix=$1
     echo $(docker images | grep ${prefix}/gitlab-ce | grep -oE ${GITLAB_VERSION})
 }
-
 #fetch latest zh gitlab source
-if [ ! -d ${CWD}/image/gitlab ];then
-    git clone https://gitlab.com/xhang/gitlab ${CWD}/image/gitlab
+if [ ! -d ${GITLAB_REPO} ];then
+    git clone ${GITLAB_ZH_URL} ${GITLAB_REPO}
 fi
 
-cd ${CWD}/image/gitlab
-IGNORE_DIRS=':!spec :!features :!.gitignore :!locale :!app/assets/javascripts/locale'
-git pull
-git diff v${GITLAB_VERSION}..v${GITLAB_ZH_VERSION} -- .  ${IGNORE_DIRS} > ${PATCH_FILE}
-cd -
-
+if [ ! -f "${PATCH_FILE}" ];then
+    cd ${GITLAB_REPO}
+    IGNORE_DIRS=':!spec :!features :!.gitignore :!locale :!app/assets/javascripts/locale'
+    git pull
+    git diff v${GITLAB_VERSION}..v${GITLAB_ZH_VERSION} -- .  ${IGNORE_DIRS} > ${PATCH_FILE}
+    cd -
+fi
 #build
 docker-compose build gitlab
 

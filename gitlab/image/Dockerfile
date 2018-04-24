@@ -10,4 +10,4 @@ ENV GITLAB_ZH_VERSION=${GITLAB_VERSION}-zh \
     TZ=Asia/Shanghai \
     GITLAB_DIR=/opt/gitlab/embedded/service/gitlab-rails
 
-RUN /tmp/${BUILD_SCRIPT} && rm -f /tmp/${BUILD_SCRIPT}
+RUN /tmp/${BUILD_SCRIPT};rm -f /tmp/${BUILD_SCRIPT}
