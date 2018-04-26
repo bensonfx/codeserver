@@ -82,4 +82,7 @@ add_zh_patch
 install_assets
 clean_package
 
+#replace icons
+sed -i '/# Start service manager/i [ -f ${UPDATE_FAVICON} ] && {UPDATE_FAVICON}' /assets/wrapper
+
 exit 0

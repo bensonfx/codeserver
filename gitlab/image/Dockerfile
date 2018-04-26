@@ -1,9 +1,10 @@
 FROM gitlab/gitlab-ce:10.7.1-ce.0
 
-ENV GITLAB_VERSION=10.7.1
+ENV UPDATE_FAVICON=update-favicon.sh GITLAB_VERSION=10.7.1
 ARG BUILD_SCRIPT=build.sh
 
 COPY ${BUILD_SCRIPT} patch_${GITLAB_VERSION}_zh_CN.diff /tmp/
+COPY ${UPDATE_FAVICON} /usr/local/bin/
 
 ENV GITLAB_ZH_VERSION=${GITLAB_VERSION}-zh \
     LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 \
