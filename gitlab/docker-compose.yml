@@ -34,3 +34,5 @@ services:
       - ./data:/var/opt/gitlab
       - ./logs:/var/log/gitlab
     mem_limit: 4096M
+    tmpfs:
+      - /tmp

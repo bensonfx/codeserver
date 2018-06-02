@@ -16,7 +16,7 @@ init_deps() {
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
     curl -sL https://deb.nodesource.com/setup_8.x | bash -
-    apt-get install -yqq locales tzdata
+    apt-get install -yqq locales
     locale-gen en_US.UTF-8
 
     apt-get install -yqq $buildDeps
@@ -52,13 +52,22 @@ install_assets() {
     export WEBPACK_REPORT=true
     export NO_COMPRESSION=true
     export NO_PRIVILEGE_DROP=true
-    yarn install --frozen-lockfile
+
+    YARN_CACHE=/tmp/yarn_cache
+    NODE_PATH=/tmp/node_modules
+    NODE_CACHE=/tmp/node_cache
+
+    npm config set cache ${NODE_CACHE}
+    yarn install --frozen-lockfile --cache-folder ${YARN_CACHE}
+
+
     bundle exec rake gettext:compile
     bundle exec rake gitlab:assets:compile
 }
 
 clean_package() {
     echo " # Cleaning ..."
+    cd ${GITLAB_DIR}
     yarn cache clean
     rm -rf log \
         tmp \
@@ -74,7 +83,8 @@ clean_package() {
         -o APT::AutoRemove::SuggestsImportant=false \
         $buildDeps
     find /usr/lib/ -name __pycache__ | xargs rm -rf
-    rm -rf /tmp/gitlab /tmp/*.diff /root/.cache /var/lib/apt/lists/*
+    rm -rf /tmp/gitlab /tmp/*.diff /root/.cache /var/lib/apt/lists/* \
+        ${YARN_CACHE}  ${NODE_PATH} ${NODE_CACHE}
 }
 ### main function ###
 init_deps
