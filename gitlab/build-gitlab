@@ -9,6 +9,8 @@ GITLAB_VERSION=$(grep -o "GITLAB_VERSION=.*" ${DOCKER_PATH} | awk -F = '{print $
 GITLAB_ZH_VERSION=${GITLAB_VERSION}-zh
 PATCH_FILE=${CWD}/image/patch_${GITLAB_VERSION}_zh_CN.diff
 
+GITLAB_BRANCH=$(echo $GITLAB_VERSION | sed -r 's@([0-9]+).([0-9]+).*@\1-\2-stable-zh@')
+
 gitlab_image_exist() {
     local prefix=$1
     echo $(docker images | grep ${prefix}/gitlab-ce | grep -oE ${GITLAB_VERSION})
@@ -20,11 +22,20 @@ fi
 
 if [ ! -f "${PATCH_FILE}" ];then
     cd ${GITLAB_REPO}
+    # git pull
+    git fetch
+    if [ -n "$(git branch | grep ${GITLAB_BRANCH})" ];then
+        git checkout ${GITLAB_BRANCH}
+    else
+        git checkout -b ${GITLAB_BRANCH} origin/${GITLAB_BRANCH}
+    fi
+    git merge
+
     IGNORE_DIRS=':!spec :!features :!.gitignore :!locale :!app/assets/javascripts/locale'
-    git pull
     git diff v${GITLAB_VERSION}..v${GITLAB_ZH_VERSION} -- .  ${IGNORE_DIRS} > ${PATCH_FILE}
     cd -
 fi
+
 #build
 docker-compose build gitlab
 
