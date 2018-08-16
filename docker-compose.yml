@@ -1,0 +1,16 @@
+  crayon:
+    restart: always
+    image: nginx:1.13.11-alpine
+    ports:
+      - "1234:80"
+    volumes:
+      - ./source:/data/source
+      - ./conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./log/:/data/log/
+    links:
+      - php
+  php:
+    image: php:7.2.4-fpm-alpine
+    volumes:
+      - ./source:/data/source
+      - ./conf/php-fpm-www.conf:/usr/local/etc/php-fpm.d/www.conf
