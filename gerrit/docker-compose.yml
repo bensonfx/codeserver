@@ -20,6 +20,7 @@ services:
     hostname: "ldap.example.com"
     ports:
       - "389:389"
+      - "636:636"
     restart: unless-stopped
     environment:
       TZ: "Asia/Shanghai"
@@ -28,6 +29,9 @@ services:
       LDAP_ADMIN_PASSWORD: "your_ldap_password"
       LDAP_CONFIG_PASSWORD: "your_ldap_passwrd"
       LDAP_BACKEND: "mdb"
+      LDAP_TLS_CRT_FILENAME: "ldap.crt"
+      LDAP_TLS_KEY_FILENAME: "ldap.key"
+      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
     volumes:
       - ./ldap/var:/var/lib/ldap
       - ./ldap/etc:/etc/ldap/slapd.d
