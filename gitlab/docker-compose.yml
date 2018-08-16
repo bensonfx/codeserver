@@ -2,7 +2,7 @@ version: '2'
 services:
   gitlab:
     build: 'image'
-    image: 'bensonfx/gitlab-ce-zh:11.0.1'
+    image: 'bensonfx/gitlab-ce-zh:11.3.6'
     restart: unless-stopped
     hostname: 'gitlab.example.com'
     environment:
