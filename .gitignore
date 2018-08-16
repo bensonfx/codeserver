@@ -8,4 +8,8 @@ target/
 
 gitlab/image/gitlab/
 gitlab/image/patch_*_zh_CN.diff
+/gerrit/image/bin/stable.war
+/gerrit/image/bin/gerrit*.war
+/gerrit/image/gerrit
+/gerrit/image/plugins
 /zentao

@@ -2,50 +2,44 @@
 set -e
 
 set_gerrit_config() {
-  gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/gerrit.config" "$@"
+    gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/gerrit.config" "$@"
 }
 
 set_secure_config() {
-  gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/secure.config" "$@"
+    gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/secure.config" "$@"
 }
 
 set_gitiles_config() {
-  gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/gitiles.config" "$@"
+    gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/gitiles.config" "$@"
 }
 
 install_plugin() {
-  local plugin=$1
-  [ -f ${GERRIT_SITE}/plugins/${plugin} ] || gosu ${GERRIT_USER} cp -f ${GERRIT_HOME}/${plugin} ${GERRIT_SITE}/plugins/
+    local plugin="$1.jar"
+    [ -f "${GERRIT_HOME}/${plugin}" ] || return
+    if [ "$2" = "force" -o ! -f "${GERRIT_SITE}/plugins/${plugin}" ];then
+        gosu ${GERRIT_USER} cp -f "${GERRIT_HOME}/${plugin}" ${GERRIT_SITE}/plugins/
+    fi
 }
 wait_for_database() {
-  echo "Waiting for database connection $1:$2 ..."
-  until nc -z $1 $2; do
-    sleep 1
-  done
+    echo "Waiting for database connection $1:$2 ..."
+    until nc -z $1 $2; do
+        sleep 1
+    done
 
-  # Wait to avoid "panic: Failed to open sql connection pq: the database system is starting up"
-  sleep 1
+    # Wait to avoid "panic: Failed to open sql connection pq: the database system is starting up"
+    sleep 1
 }
 
 init_database() {
     #Section database
     case ${DATABASE_TYPE} in
-        postgresql)
+        postgresql|mysql)
             set_gerrit_config database.type "${DATABASE_TYPE}"
-            [ -z "${DB_PORT_5432_TCP_ADDR}" ]    || set_gerrit_config database.hostname "${DB_PORT_5432_TCP_ADDR}"
-            [ -z "${DB_PORT_5432_TCP_PORT}" ]    || set_gerrit_config database.port "${DB_PORT_5432_TCP_PORT}"
-            [ -z "${DB_ENV_POSTGRES_DB}" ]       || set_gerrit_config database.database "${DB_ENV_POSTGRES_DB}"
-            [ -z "${DB_ENV_POSTGRES_USER}" ]     || set_gerrit_config database.username "${DB_ENV_POSTGRES_USER}"
-            [ -z "${DB_ENV_POSTGRES_PASSWORD}" ] || set_secure_config database.password "${DB_ENV_POSTGRES_PASSWORD}"
-            ;;
-        #Section database
-        mysql)
-            set_gerrit_config database.type "${DATABASE_TYPE}"
-            [ -z "${DB_PORT_3306_TCP_ADDR}" ] || set_gerrit_config database.hostname "${DB_PORT_3306_TCP_ADDR}"
-            [ -z "${DB_PORT_3306_TCP_PORT}" ] || set_gerrit_config database.port "${DB_PORT_3306_TCP_PORT}"
-            [ -z "${DB_ENV_MYSQL_DB}" ]       || set_gerrit_config database.database "${DB_ENV_MYSQL_DB}"
-            [ -z "${DB_ENV_MYSQL_USER}" ]     || set_gerrit_config database.username "${DB_ENV_MYSQL_USER}"
-            [ -z "${DB_ENV_MYSQL_PASSWORD}" ] || set_secure_config database.password "${DB_ENV_MYSQL_PASSWORD}"
+            [ -z "${DATABASE_ADDR}" ]    || set_gerrit_config database.hostname "${DATABASE_ADDR}"
+            [ -z "${DATABASE_PORT}" ]    || set_gerrit_config database.port "${DATABASE_PORT}"
+            [ -z "${DATABASE_NAME}" ]       || set_gerrit_config database.database "${DATABASE_NAME}"
+            [ -z "${DATABASE_USER}" ]     || set_gerrit_config database.username "${DATABASE_USER}"
+            [ -z "${DATABASE_PASSWORD}" ] || set_secure_config database.password "${DATABASE_PASSWORD}"
             ;;
         *)
     esac
@@ -112,7 +106,7 @@ init_auth() {
 
     #Section OAUTH general
     if [ "${AUTH_TYPE}" = 'OAUTH' ]  ; then
-        install_plugin "gerrit-oauth-provider.jar"
+        install_plugin "gerrit-oauth-provider"
         [ -z "${OAUTH_ALLOW_EDIT_FULL_NAME}" ]     || set_gerrit_config oauth.allowEditFullName "${OAUTH_ALLOW_EDIT_FULL_NAME}"
         [ -z "${OAUTH_ALLOW_REGISTER_NEW_EMAIL}" ] || set_gerrit_config oauth.allowRegisterNewEmail "${OAUTH_ALLOW_REGISTER_NEW_EMAIL}"
 
@@ -191,49 +185,64 @@ init_plugins() {
     #Section plugin events-log
     set_gerrit_config plugin.events-log.storeUrl "jdbc:h2:${GERRIT_SITE}/db/ChangeEvents"
 
-    #Section gitweb
-    case "$GITWEB_TYPE" in
-        "gitiles")
-            install_plugin gitiles.jar
-            set_gitiles_config gerrit.linkname $GITWEB_TYPE
-            set_gitiles_config gerrit.target _self
-            set_gitiles_config gitweb.type $GITWEB_TYPE
-            ;;
-        "") # Gitweb by default
+    #Section gitweb/gitiles
+    [ -z "$GITWEB_TYPE" ] && export GITWEB_TYPE=gitweb
+    install_plugin $GITWEB_TYPE
+    case $GITWEB_TYPE in
+        gitiles)
+           set_gitiles_config gerrit.linkname $GITWEB_TYPE
+           set_gitiles_config gerrit.target _self
+           set_gitiles_config gerrit.baseUrl /$GITWEB_TYPE
+           ;;
+        gitweb) # Gitweb by default
             set_gerrit_config gitweb.cgi "/usr/share/gitweb/gitweb.cgi"
-            export GITWEB_TYPE=gitweb
+            set_gerrit_config gitweb.type "$GITWEB_TYPE"
             ;;
     esac
-    set_gerrit_config gitweb.type "$GITWEB_TYPE"
 }
 
 gen_version() {
     local ver=${1:-$GERRIT_VERSION}
     [ -z "$ver" ] && return
-    gosu ${GERRIT_USER} touch "${GERRIT_VERSIONFILE}"
     gosu ${GERRIT_USER} echo "$ver" > "${GERRIT_VERSIONFILE}"
-    echo "${GERRIT_VERSIONFILE} written."
+    echo "${GERRIT_VERSIONFILE} is written."
 }
 
-check_init_gerrit() {
-# Initialize Gerrit
-if ! [ -f ${GERRIT_SITE}/etc/gerrit.config ];then
-    echo -ne "initialize gerrit ..."
+update_plugins() {
+    [ "$GITWEB_TYPE" = "gitiles" ] && install_plugin $GITWEB_TYPE force
+    [ "${AUTH_TYPE}" = 'OAUTH' ]  && install_plugin "gerrit-oauth-provider" force
+}
+
+do_init_gerrit() {
     gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init \
         --batch --no-auto-start --install-all-plugins \
         -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
-    local ret=$?
-    if [ $ret -eq 0 ];then
+    ret=$?
+    # redinex
+    echo "Reindexing..."
+    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" reindex -d "${GERRIT_SITE}"
+    if [ $? -eq 0 ]; then
+        #echo "Upgrading is OK. Writing versionfile ${GERRIT_VERSIONFILE}"
+        echo "gerrit ${GERRIT_VERSION}:exec init success"
         gen_version
     else
-        echo -ne "init gerrit Failed!"
+        cat "${GERRIT_SITE}/logs/error_log"
+        echo "gerrit ${GERRIT_VERSION} exec init failed"
     fi
     return $ret
-fi
+}
+
+init_gerrit_once() {
+    # Initialize Gerrit
+    echo "initialize gerrit ..."
+    if ! [ -f ${GERRIT_SITE}/etc/gerrit.config ];then
+        do_init_gerrit
+        return $?
+    fi
 }
 
 check_update_gerrit() {
-    check_init_gerrit
+    [ -n "${IGNORE_VERSIONCHECK}" ] && return
 
     echo "Checking gerrit version"
     local old_version="v$(cat ${GERRIT_VERSIONFILE})"
@@ -241,31 +250,17 @@ check_update_gerrit() {
     [ "${old_version}" = "${cur_version}" ] && return
     #there is new gerrit version, download it
     echo "Upgrading gerrit..."
-    ${GERRIT_HOME}/fetch_gerrit.sh gerrit
-    ${GERRIT_HOME}/fetch_gerrit.sh plugin
-
-    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init \
-        --batch --no-auto-start \
-        -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
+    do_init_gerrit
     if [ $? -ne 0 ]; then
-        echo "Something wrong..."
-        cat "${GERRIT_SITE}/logs/error_log"
+        echo "Upgrading fail! Something wrong..."
+        return 1
     fi
-
-    # gerrit version update and redinex
-    [ -n "${IGNORE_VERSIONCHECK}" ] && return
-    echo "Reindexing..."
-    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" reindex --verbose -d "${GERRIT_SITE}"
-    if [ $? -eq 0 ]; then
-        echo "Upgrading is OK. Writing versionfile ${GERRIT_VERSIONFILE}"
-        gen_version
-    else
-        echo "Upgrading fail!"
-    fi
+    update_plugins
+    echo "Upgrade to ${GERRIT_VERSION} success"
 }
 
 ############ main function start ############
-GERRIT_VERSIONFILE="${GERRIT_SITE}/gerrit_version"
+GERRIT_VERSIONFILE="${GERRIT_SITE}/VERSION"
 
 if [ -n "${JAVA_HEAPLIMIT}" ]; then
   JAVA_MEM_OPTIONS="-Xmx${JAVA_HEAPLIMIT}"
@@ -273,11 +268,11 @@ fi
 
 # This obviously ensures the permissions are set correctly for when gerrit starts.
 find "${GERRIT_SITE}/" ! -user `id -u ${GERRIT_USER}` -exec chown ${GERRIT_USER} {} \;
+
 # Initialize Gerrit
-check_init_gerrit
+init_gerrit_once
 
 # Provide a way to customise this image
-echo
 for f in /entrypoint-init.d/*; do
     case "$f" in
     *.sh)    echo "$0: running $f"; source "$f" ;;
@@ -295,8 +290,7 @@ init_mail
 init_plugins
 
 case "${DATABASE_TYPE}" in
-    postgresql) wait_for_database ${DB_PORT_5432_TCP_ADDR} ${DB_PORT_5432_TCP_PORT} ;;
-    mysql)      wait_for_database ${DB_PORT_3306_TCP_ADDR} ${DB_PORT_3306_TCP_PORT} ;;
+    postgresql|mysql) wait_for_database ${DATABASE_ADDR} ${DATABASE_PORT} ;;
     *)          ;;
 esac
 

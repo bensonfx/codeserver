@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CWD=$(pwd)
+CWD=$(cd `dirname $0`;pwd)
 COMPOSE_FILE=${CWD}/docker-compose.yml
 DOCKER_FILE=${CWD}/image/Dockerfile
 
@@ -10,6 +10,6 @@ fi
 
 new_version=$1
 
-sed -ri "s@bensonfx/gerrit:[0-9\.]+@bensonfx/gerrit:${new_version}@g" ${COMPOSE_FILE}
-sed -ri "s@GERRIT_VERSION=[0-9\.]+@GERRIT_VERSION=${new_version}@g" ${DOCKER_FILE}
+sed -ri "s@bensonfx/gerrit:.*[^\"]@bensonfx/gerrit:${new_version}@g" ${COMPOSE_FILE}
+sed -ri "s@GERRIT_VERSION=.*[^\ ]@GERRIT_VERSION=${new_version}@g" ${DOCKER_FILE}
 

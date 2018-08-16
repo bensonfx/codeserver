@@ -1,1 +1,2 @@
-gerrit-*.war
+/gerrit-*.war
+/gerrit.war

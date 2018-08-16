@@ -11,10 +11,9 @@ ENV GERRIT_SITE=${GERRIT_HOME}/review_site \
     GERRIT_WAR=${GERRIT_HOME}/gerrit.war
 
 # Ensure the entrypoint scripts are in a fixed location
-COPY gerrit-start.sh fetch_gerrit.sh ${GERRIT_HOME}/
-COPY gosu /usr/bin/
+COPY gerrit-*.sh plugins/*.jar bin/gosu* bin/gerrit*.war ${GERRIT_HOME}/
 #&& curl -fSsL https://gerrit-releases.storage.googleapis.com/gerrit-${GERRIT_VERSION}.war -o ${TMP_GERRIT_WAR} \
-RUN set -xe && ${GERRIT_HOME}/fetch_gerrit.sh
+RUN set -ex && ${GERRIT_HOME}/gerrit-fetch.sh
 
 EXPOSE 8080 29418
 

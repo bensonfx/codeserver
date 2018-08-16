@@ -1,9 +1,10 @@
 #!/bin/sh
 
-set -ex
+set -e
 DEBIAN_FRONTEND=noninteractive
 GERRIT_WAR_URL="http://repo1.maven.org/maven2/com/google/gerrit/gerrit-war/${GERRIT_VERSION}/gerrit-war-${GERRIT_VERSION}.war"
 GOSU_URL="https://github.com/tianon/gosu/releases"
+GOSU="/usr/bin/gosu"
 
 #################### plugin define ####################
 GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
@@ -12,6 +13,7 @@ GERRIT_OAUTH_URL="https://github.com/davido/gerrit-oauth-provider/releases"
 
 plugin_list="IMPORTER GITILES DELPROJ EVENTSLOG LFS"
 suffix=$(echo ${GERRIT_VERSION} | sed -r "s@([0-9]\.[0-9]+).*@\1@g")
+default_version=bazel-stable-$suffix
 
 IMPORTER_NAME=importer
 GITILES_NAME=gitiles
@@ -23,15 +25,20 @@ OAUTH_NAME=gerrit-oauth-provider
 ################## plugin define end ##################
 
 clean() {
+    echo "# cleaning tmp files ..."
     rm -rf /var/lib/apt/lists/* /tmp/*
 }
 
 init_env() {
-    echo " # Preparing ..."
+    echo " # Preparing environment ..."
     sed -i "s@http://archive.ubuntu.com@http://mirrors.aliyun.com@g" /etc/apt/sources.list
     if ! id -u ${GERRIT_USER} > /dev/null 2>&1;then
         useradd -Ulms /sbin/nologin ${GERRIT_USER}
     fi
+    #rename gerrit war to gerrit.war
+    local war_file=$(ls ${GERRIT_HOME}/gerrit*.war)
+    [ "$war_file" = "${GERRIT_HOME}/gerrit.war" ] || mv -f $war_file ${GERRIT_HOME}/gerrit.war
+
     chmod a+x ${GERRIT_HOME}/*.sh
     install -d /entrypoint-init.d
     chown -R ${GERRIT_USER} ${GERRIT_HOME}
@@ -44,20 +51,26 @@ init_env() {
 }
 
 fetch_gosu() {
-    local GOSU_QUERY=$(curl -ksSL ${GOSU_URL} | grep -oE "download/[0-9.]+/gosu-amd64"| head -n1)
-
-    local GOSU="/usr/bin/gosu"
-    curl -Lo $GOSU "${GOSU_URL}/${GOSU_QUERY}"
+    local gosu_bin="${GERRIT_HOME}/gosu*"
+    if [ -f $gosu_bin ];then
+        mv -fv $gosu_bin $GOSU
+        return
+    fi
+    local GOSU_VERSION=$(curl -ksS "${GOSU_URL}/latest" | sed -r "s@.*tag/([0-9.]+).*@\1@g")
+    echo "# downloading gosu $GOSU_VERSION ..."
+    local URI="download/${GOSU_VERSION}/gosu-amd64"
+    curl -Lo $GOSU "${GOSU_URL}/${URI}"
     chmod a+x $GOSU
 }
 
 fetch_plugins() {
     for PLUGIN in ${plugin_list};do
-        eval local version=\${${PLUGIN}_VERSION:=bazel-stable-$suffix}
+        eval local version=\${${PLUGIN}_VERSION:=$default_version}
         eval local name=\${${PLUGIN}_NAME}
         local plugin_url=${GERRITFORGE_URL}/job/plugin-${name}-${version}/${PLUGIN_ARTIFACT_URI}/${name}/${name}.jar
 
-        echo "downloading plugin:${name}"
+        [ -f "${GERRIT_HOME}/${name}.jar" ] && continue
+        echo "downloading plugin: ${name}"
         curl -L ${plugin_url} -o ${GERRIT_HOME}/${name}.jar
     done
 
@@ -67,8 +80,11 @@ fetch_plugins() {
 }
 
 fetch_gerrit_war() {
-    curl -L ${GERRIT_WAR_URL} -o ${GERRIT_WAR}
-    #fetch_gosu
+    if [ ! -f "${GERRIT_WAR}" ];then
+        echo "# downloading $(basename ${GERRIT_WAR}) ${GERRIT_VERSION} ..."
+        curl -L ${GERRIT_WAR_URL} -o ${GERRIT_WAR}
+    fi
+    fetch_gosu
 }
 
 case $1 in
