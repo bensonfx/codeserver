@@ -1,0 +1,28 @@
+version: '3.1'
+services:
+  zentao:
+    image: bensonfx/zentao:10.2
+    build: image
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    working_dir: /wwwroot
+    environment:
+      ZENTAO_SERVER: example.com
+      ZENTAO_ROOT: /wwwroot/zentaopms/www
+    volumes:
+      - ./wwwroot:/wwwroot/zentaopms
+      - ./ssl:/wwwroot/ssl
+    ports:
+      - "443:443"
+      - "80:80"
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_password
+      MYSQL_DATABASE: zentao
+      MYSQL_USER: zentaoDB
+      MYSQL_PASSWORD: your_zentao_password
+    volumes:
+      - ./mysql:/var/lib/mysql

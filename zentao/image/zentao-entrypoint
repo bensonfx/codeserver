@@ -1,0 +1,25 @@
+#!/bin/sh
+set -ex
+export LC_ALL=C
+
+ZENTAO_PKG=${WEB_ROOT}/zentao.zip
+ZENTAO_DIR=${WEB_ROOT}/zentaopms
+CFG_FILE=${ZENTAO_DIR}/config/config.php
+PHP_SESSION_DIR=${ZENTAO_DIR}/tmp/session
+
+if [ ! -f "${CFG_FILE}" ];then
+    unzip -q ${ZENTAO_PKG} -d ${WEB_ROOT}
+    [ -d "${PHP_SESSION_DIR}" ] || install -d ${PHP_SESSION_DIR}
+    chown -R www-data:www-data ${ZENTAO_DIR}
+    chmod -R o-rwx ${ZENTAO_DIR}
+fi
+# first arg is `-f` or `--some-option`
+if [ "${1#-}" != "$1" ]; then
+    set -- php-fpm "$@"
+fi
+i=0
+for cmd in $@;do
+    let i=i+1
+    [ $i -eq $# ] && exec $cmd
+    $cmd
+done

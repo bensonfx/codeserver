@@ -1,0 +1,8 @@
+{$ZENTAO_SERVER} {
+    tls /wwwroot/ssl/server.crt /wwwroot/ssl/server.key
+    index index.php index.htm index.html
+    root {$ZENTAO_ROOT}
+    log /dev/stdout
+
+    fastcgi / zentao:9000 php
+}

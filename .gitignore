@@ -10,7 +10,12 @@ gitlab/image/gitlab/
 gitlab/image/patch_*_zh_CN.diff
 gitlab/image/*.tgz
 
+<<<<<<< HEAD
 /gerrit/image/bin/stable.war
 /gerrit/image/bin/gerrit*.war
 /gerrit/image/gerrit
 /gerrit/image/plugins
+=======
+/config
+/gerrit
+>>>>>>> zentao 10.2 stable
