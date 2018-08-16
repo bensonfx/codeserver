@@ -6,5 +6,5 @@
         load /wwwroot/ssl
     }
 
-    fastcgi / zentao:9000 php
+    fastcgi / 127.0.0.1:9000 php
 }
