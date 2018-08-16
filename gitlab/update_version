@@ -10,7 +10,7 @@ fi
 
 new_version=$1
 
-sed -i "s@bensonfx/gitlab-ce-zh:.*@bensonfx/gitlab-ce-zh:${new_version}\'@g" ${COMPOSE_FILE}
-sed -i "s@gitlab/gitlab-ce:.*@gitlab/gitlab-ce:${new_version}-ce.0@g" ${DOCKER_FILE}
+sed -ri "s@bensonfx/gitlab-ce-zh:[0-9.]+@bensonfx/gitlab-ce-zh:${new_version}@g" ${COMPOSE_FILE}
+sed -ri "s@gitlab/gitlab-ce:[0-9.]+@gitlab/gitlab-ce:${new_version}@g" ${DOCKER_FILE}
 sed -ri "s@GITLAB_VERSION=[0-9.]+@GITLAB_VERSION=${new_version}@g" ${DOCKER_FILE}
 

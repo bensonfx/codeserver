@@ -29,11 +29,15 @@ add_zh_patch() {
     # git clone ${GITLAB_ZH_GIT} /tmp/gitlab
     # cd /tmp/gitlab
     # export IGNORE_DIRS=':!spec :!features :!.gitignore :!locale :!app/assets/javascripts/locale'
+    # IGNORE_DIRS=':!qa :!spec :!features :!.gitignore :!.gitlab :!locale :!app/assets/ :!vendor/assets/'
     # git diff ${GITLAB_VERSION}..${GITLAB_ZH_VERSION} -- .  ${IGNORE_DIRS} > /tmp/${GITLAB_VERSION}_zh_CN.diff
     echo " # Patching ..."
     patch -d ${GITLAB_DIR} -p1 < /tmp/patch_${GITLAB_VERSION}_zh_CN.diff
-    # echo " # Copy locale files ..."
-    # cp -R /tmp/locale ${GITLAB_DIR}/
+
+    echo " # Copy assets files ..."
+    tar xf /tmp/locale.tgz -C ${GITLAB_DIR}/
+    tar xf /tmp/app_assets.tgz -C ${GITLAB_DIR}/
+    tar xf /tmp/vendor_assets.tgz -C ${GITLAB_DIR}/
 }
 
 # Reference: https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/config/software/gitlab-rails.rb
@@ -52,6 +56,7 @@ install_assets() {
     export WEBPACK_REPORT=true
     export NO_COMPRESSION=true
     export NO_PRIVILEGE_DROP=true
+    export NODE_OPTIONS=--max-old-space-size=4086
 
     YARN_CACHE=/tmp/yarn_cache
     NODE_PATH=/tmp/node_modules
@@ -59,10 +64,9 @@ install_assets() {
 
     npm config set cache ${NODE_CACHE}
     yarn install --frozen-lockfile --cache-folder ${YARN_CACHE}
-
-
-    bundle exec rake gettext:compile
-    bundle exec rake gitlab:assets:compile
+    bin/bundle install --frozen
+    bin/rake gettext:compile
+    bin/rake gitlab:assets:compile
 }
 
 clean_package() {
@@ -83,7 +87,7 @@ clean_package() {
         -o APT::AutoRemove::SuggestsImportant=false \
         $buildDeps
     find /usr/lib/ -name __pycache__ | xargs rm -rf
-    rm -rf /tmp/gitlab /tmp/*.diff /root/.cache /var/lib/apt/lists/* \
+    rm -rf /tmp/gitlab /tmp/*.diff /tmp/*.tgz /root/.cache /var/lib/apt/lists/* \
         ${YARN_CACHE}  ${NODE_PATH} ${NODE_CACHE}
 }
 ### main function ###
