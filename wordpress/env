@@ -1,0 +1,4 @@
+WEB_ROOT=./blog
+WEB_ROOT_MOUNT=/var/www/html
+MYSQL_ROOT=./mysql
+MYSQL_ROOT_MOUNT=/var/lib/mysql

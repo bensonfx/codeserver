@@ -1,0 +1,41 @@
+version: '3.1'
+services:
+  wordpress:
+    image: wordpress:4.9-php7.2-fpm-alpine
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      WORDPRESS_DB_USER: blog
+      WORDPRESS_DB_PASSWORD: your_wordpress_password
+    env_file:
+      - ./env
+    volumes:
+      - ${WEB_ROOT}:${WEB_ROOT_MOUNT}
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: blog
+      MYSQL_PASSWORD: your_wordpress_password
+    env_file:
+      - ./env
+    volumes:
+      - ${MYSQL_ROOT}:${MYSQL_ROOT_MOUNT}
+
+  caddy:
+    image: bensonfx/caddy
+    build: caddy
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+    env_file:
+      - ./env
+    volumes:
+      - ${WEB_ROOT}:${WEB_ROOT_MOUNT}
+    ports:
+      - "443:443"
+      - "80:80"
+

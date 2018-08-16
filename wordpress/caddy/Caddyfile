@@ -1,0 +1,12 @@
+example.com {
+    # tls example.com.crt example.com.key
+    root /var/www/html
+    gzip
+    log /dev/stdout
+
+    fastcgi / wordpress:9000 php
+    rewrite {
+        if {path} not_match ^\/wp-admin
+        to {path} {path}/ /index.php?{query}
+    }
+}
