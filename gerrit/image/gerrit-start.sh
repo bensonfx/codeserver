@@ -242,6 +242,7 @@ check_update_gerrit() {
     #there is new gerrit version, download it
     echo "Upgrading gerrit..."
     ${GERRIT_HOME}/fetch_gerrit.sh gerrit
+    ${GERRIT_HOME}/fetch_gerrit.sh plugin
 
     gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init \
         --batch --no-auto-start \

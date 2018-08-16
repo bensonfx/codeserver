@@ -29,13 +29,17 @@ clean() {
 init_env() {
     echo " # Preparing ..."
     sed -i "s@http://archive.ubuntu.com@http://mirrors.aliyun.com@g" /etc/apt/sources.list
-    useradd -Ulms /sbin/nologin ${GERRIT_USER}
+    if ! id -u ${GERRIT_USER} > /dev/null 2>&1;then
+        useradd -Ulms /sbin/nologin ${GERRIT_USER}
+    fi
     chmod a+x ${GERRIT_HOME}/*.sh
-    mkdir /entrypoint-init.d
+    install -d /entrypoint-init.d
     chown -R ${GERRIT_USER} ${GERRIT_HOME}
     apt-get update
     # apt-get install -yqq --no-install-recommends openjdk-8-jdk curl git openssh-client vim
-    apt-get install -yqq openjdk-8-jdk curl git openssh-client
+    if [ -z "$(which java)" ];then
+        apt-get install -yqq --no-install-recommends openjdk-8-jdk curl git openssh-client
+    fi
     clean
 }
 
@@ -63,18 +67,19 @@ fetch_plugins() {
 }
 
 fetch_gerrit_war() {
-    init_env
     curl -L ${GERRIT_WAR_URL} -o ${GERRIT_WAR}
     #fetch_gosu
 }
 
 case $1 in
-
+    init)
+        init_env;;
     gerrit)
         fetch_gerrit_war;;
     plugins)
         fetch_plugins;;
     *)
+        init_env
         fetch_gerrit_war
         fetch_plugins
         ;;
