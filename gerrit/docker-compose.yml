@@ -2,7 +2,7 @@ version: "2.2"
 services:
   gerrit:
     build: "image"
-    image: "bensonfx/gerrit:2.15.1"
+    image: "bensonfx/gerrit:2.15.3"
     restart: unless-stopped
     hostname: "review.example.com"
     depends_on:
