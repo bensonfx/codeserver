@@ -24,6 +24,7 @@ init_deps() {
 cat << EOF > ${session_cfg}
 session.save_handler = "files"
 session.save_path    = "${PHP_SESSION_DIR}"
+expose_php = false
 EOF
     #run php-fpm as deamon
     local php_fpm_cfg=/usr/local/etc/php-fpm.d/zz-docker.conf
