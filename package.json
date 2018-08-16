@@ -1,0 +1,21 @@
+{
+  "name": "hugo-content-minify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "minify.js",
+  "bin": {
+    "hugo-content-minify": "minify"
+  },
+  "scripts": {
+    "start": "bin/minify --use-config true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.lab.com:blog/hugo/hugo-content-minify.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "2.15.1"
+  }
+}
