@@ -1,0 +1,1 @@
+soulteary/hugo-content-minify:1.0.0
