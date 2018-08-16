@@ -8,3 +8,4 @@ target/
 
 gitlab/image/gitlab/
 gitlab/image/patch_*_zh_CN.diff
+/zentao
