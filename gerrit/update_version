@@ -3,6 +3,7 @@
 CWD=$(cd `dirname $0`;pwd)
 COMPOSE_FILE=${CWD}/docker-compose.yml
 DOCKER_FILE=${CWD}/image/Dockerfile
+BUILD_SCRIPT=${CWD}/build-gerrit
 
 if [ $# -eq 0 ];then
     echo "$0 new_version"
@@ -12,4 +13,7 @@ new_version=$1
 
 sed -ri "s@bensonfx/gerrit:.*[^\"]@bensonfx/gerrit:${new_version}@g" ${COMPOSE_FILE}
 sed -ri "s@GERRIT_VERSION=.*[^\ ]@GERRIT_VERSION=${new_version}@g" ${DOCKER_FILE}
+if [ "$2" != "master" -o "$2" != "reset" ];then
+    sed -ri "s@^STABLE_VERSION=.*@STABLE_VERSION=${new_version}@g" ${BUILD_SCRIPT}
+fi
 
