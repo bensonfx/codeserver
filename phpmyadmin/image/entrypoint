@@ -1,0 +1,30 @@
+#!/bin/sh
+set -ex
+export LC_ALL=C
+
+init_pkg() {
+    VER=${PHPMYADMIN_VER:-4.8.3}
+    PHPMYADMIN_NAME=phpMyAdmin-${VER}-all-languages
+    configfile=${WEB_ROOT}/stack/config.inc.php
+    if [ ! -f ${cfgfile} ];then
+        cp -af ${PHPMYADMIN_NAME}/* stack/
+        cp stack/config.sample.inc.php ${configfile}
+        blowfish=$(head -c 500 /dev/urandom | tr -dc [:alnum:]| head -c 32)
+        sed -i "s@^\$cfg['blowfish_secret'].*@\$cfg['blowfish_secret'] = \'${blowfish}\'@g" ${configfile}
+        sed -i "s@\$cfg['Servers'][\$i]['host']@\$cfg['Servers'][\$i]['host'] = \'${MYSQL_IP}\'"
+        sed -i "s@^\$cfg['UploadDir'].*@\$cfg['UploadDir'] = \'upload\'@g" ${configfile}
+        sed -i "s@^\$cfg['SaveDir'].*@\$cfg['SaveDir'] = \'save\'@g" ${configfile}
+    fi
+}
+
+init_pkg
+# first arg is `-f` or `--some-option`
+if [ "${1#-}" != "$1" ]; then
+    set -- php-fpm "$@"
+fi
+i=0
+for cmd in $@;do
+    let i=i+1
+    [ $i -eq $# ] && exec $cmd
+    $cmd
+done

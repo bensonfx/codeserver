@@ -1,0 +1,20 @@
+version: '3.1'
+services:
+  phpmyadmin:
+    image: bensonfx/phpmyadmin
+    build: image
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    working_dir: /wwwroot
+    environment:
+      PHP_SERVER: "example.com"
+      PHP_ROOT: /wwwroot/stack
+      MYSQL_IP: "mysql"
+    volumes:
+      - ./data/stack:/wwwroot/stack
+      - ./data/ssl:/wwwroot/ssl
+    ports:
+      - "443:443"
+      - "80:80"
+

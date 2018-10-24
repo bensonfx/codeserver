@@ -5,6 +5,6 @@ target/
 .project
 /.settings/org.maven.ide.eclipse.prefs
 /.settings/org.eclipse.m2e.core.prefs
-
 gitlab/image/gitlab/
 gitlab/image/patch_*_zh_CN.diff
+/gerrit

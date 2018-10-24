@@ -1,0 +1,10 @@
+{$PHP_SERVER} {
+    root {$PHP_ROOT}
+    index index.php index.htm index.html
+    log /dev/stdout
+    tls {
+        load /wwwroot/ssl
+    }
+
+    fastcgi / unix:/dev/shm/php-cgi.sock php
+}
