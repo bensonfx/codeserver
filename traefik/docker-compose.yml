@@ -12,6 +12,7 @@ services:
       - "443:443"
     labels:
       - "traefik.docker.network=traefik"
+      - "traefik.frontend.passHostHeader=true"
 networks:
   default:
     name: traefik
