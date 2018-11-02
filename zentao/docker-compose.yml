@@ -14,10 +14,10 @@ services:
       - ./wwwroot:/wwwroot/zentaopms
       - ./ssl:/wwwroot/ssl
     ports:
-      - "443:443"
-      - "80:80"
+      #- "443:443"
+      #- "80:80"
   mysql:
-    image: mysql:5.7
+    image: mysql:8
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: your_root_password
