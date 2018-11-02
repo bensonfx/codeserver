@@ -39,3 +39,13 @@ services:
     mem_limit: 4096M
     tmpfs:
       - /tmp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      #- "traefik.protocol=https"
+      - "traefik.frontend.passTLSCert=false"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.rule=Host:gitlab.example.com"
+      - "traefik.docker.network=traefik"
