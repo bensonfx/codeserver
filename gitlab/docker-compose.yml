@@ -10,6 +10,9 @@ services:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://gitlab.example.com'
         nginx['redirect_http_to_https'] = true
+        nginx['real_ip_header'] = 'X-Real-IP'
+        nginx['real_ip_recursive'] = 'on'
+        nginx['real_ip_trusted_addresses'] = ["192.168.0.0/16"] #use when behind traefik
         nginx['ssl_certificate'] = '/etc/gitlab/ssl/gitlab.crt'
         nginx['ssl_certificate_key'] = '/etc/gitlab/ssl/gitlab.key'
         gitlab_rails['time_zone'] = 'Asia/Shanghai'
