@@ -22,6 +22,7 @@ FROM gitlab/gitlab-ce:11.3.6-ce.0 as production
 
 RUN set -xe \
     && export DEBIAN_FRONTEND=noninteractive \
+    && sed -i "s@http://archive.ubuntu.com@http://mirrors.aliyun.com@g" /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -yqq locales tzdata \
     && locale-gen en_US.UTF-8 \

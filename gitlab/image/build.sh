@@ -17,7 +17,7 @@ init_deps() {
 
     curl -sL https://deb.nodesource.com/setup_8.x | bash -
     apt-get install -yqq locales
-    locale-gen en_US.UTF-8
+    locale-gen en_US.UTF-8 zh_CN.UTF-8
 
     apt-get install -yqq $buildDeps
 
