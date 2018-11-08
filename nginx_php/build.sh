@@ -4,7 +4,7 @@ list="nginx php"
 cwd=$(cd `dirname $0`;pwd)
 
 nginx_name="nginx-vts_mod"
-php_name="php-fpm"
+php_name="php-fpm-alpine"
 #CTRL="\033[${STYLE};${FG};${BG}m"
 RESET="\033[0m"
 COLOR="\033[42;37m"

@@ -161,14 +161,24 @@ init_deps() {
   config_php
   sed -i 's@dl-cdn.alpinelinux.org@mirrors.aliyun.com@g' /etc/apk/repositories
   apk add --no-cache --virtual .fetch-deps \
-          openldap-dev zlib-dev \
-          gettext-dev perl libcap git openssh
+          openldap-dev zlib-dev zip \
+          gettext-dev perl libcap git openssh \
+          freetype libpng libjpeg-turbo imagemagick-dev
   apk add --no-cache --virtual .build-deps \
-          coreutils make zip autoconf gcc libc-dev
-  export PHP_EXT="gettext zip pdo_mysql opcache mysqli"
+          coreutils make autoconf gcc libc-dev \
+          freetype-dev libpng-dev libjpeg-turbo-dev \
+          libzip-dev
+
+  docker-php-ext-configure zip --with-libzip
+  docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include/ \
+      --with-jpeg-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+
+  local PHP_EXT="gettext zip pdo_mysql opcache mysqli mbstring exif iconv gd"
   docker-php-ext-install -j$(nproc) ${PHP_EXT}
+
   pecl install -o -f redis
-  docker-php-ext-enable redis
+  pecl install -o -f imagick
+  docker-php-ext-enable redis imagick
 }
 clean() {
   apk del .build-deps
