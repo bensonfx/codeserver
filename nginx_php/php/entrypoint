@@ -1,0 +1,13 @@
+#!/bin/sh
+set -ex
+export LC_ALL=C
+# first arg is `-f` or `--some-option`
+if [ "${1#-}" != "$1" ]; then
+    set -- php-fpm "$@"
+fi
+i=0
+for cmd in $@;do
+    let i=i+1
+    [ $i -eq $# ] && exec $cmd
+    $cmd
+done
