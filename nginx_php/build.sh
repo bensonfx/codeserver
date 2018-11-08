@@ -19,6 +19,9 @@ log() {
 }
 
 build_image() {
+    if [ $# -gt 0 ]; then
+        list="$1"
+    fi
     cd $cwd
     for docker in $list;do
         local version=$(get_version $docker)
@@ -34,4 +37,4 @@ build_image() {
 }
 
 ################ main start #############
-build_image
+build_image $@
