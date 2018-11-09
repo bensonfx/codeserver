@@ -13,6 +13,11 @@ services:
     labels:
       - "traefik.docker.network=traefik"
       - "traefik.frontend.passHostHeader=true"
+  prom:
+    image: prom/prometheus:v2.5.0
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus:/prometheus
 networks:
   default:
     name: traefik

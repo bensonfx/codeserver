@@ -1,0 +1,28 @@
+# 全局配置
+global:
+  scrape_interval:     15s # 默认抓取间隔, 15秒向目标抓取一次数据。
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+  # 这个标签是在本机上每一条时间序列上都会默认产生的，主要可以用于联合查询、远程存储、Alertmanger时使用。
+  external_labels:
+      monitor: 'metrics'
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first.rules"
+  # - "second.rules"
+
+# 这里就表示抓取对象的配置
+scrape_configs:
+# job name 这个配置是表示在这个配置内的时间序例，每一条都会自动添加上这个{job_name:"prometheus"}的标签。
+  - job_name: 'traefik'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    #重写全局抓取间隔时间
+    scrape_interval: 5s
+
+    static_configs:
+      - targets: ['traefik:8083']
