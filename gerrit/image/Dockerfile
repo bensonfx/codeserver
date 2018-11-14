@@ -4,7 +4,7 @@ MAINTAINER Benson Yan <fuxin04@gmail.com>
 
 # Overridable defaults
 ENV GERRIT_HOME=/var/gerrit \
-    GERRIT_VERSION=2.16-rc1 \
+    GERRIT_VERSION=2.16 \
     GERRIT_USER=gerrit
 
 ENV GERRIT_SITE=${GERRIT_HOME}/review_site \

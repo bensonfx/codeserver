@@ -16,9 +16,12 @@ suffix=$(echo ${GERRIT_VERSION} | sed -r "s@([0-9]\.[0-9]+).*@\1@g")
 default_version=bazel-stable-$suffix
 
 IMPORTER_NAME=importer
+IMPORTER_VERSION=bazel-master
 GITILES_NAME=gitiles
+GITILES_VERSION=bazel-master-stable-2.16
 DELPROJ_NAME=delete-project
 EVENTSLOG_NAME=events-log
+EVENTSLOG_VERSION=bazel-master
 LFS_NAME=lfs
 
 OAUTH_NAME=gerrit-oauth-provider
@@ -71,7 +74,9 @@ fetch_plugins() {
 
         [ -f "${GERRIT_HOME}/${name}.jar" ] && continue
         echo "downloading plugin: ${name}"
+        set -x
         curl -L ${plugin_url} -o ${GERRIT_HOME}/${name}.jar
+        set +x
     done
 
     # local GERRIT_OAUTH_PLUGIN=$(curl -ksSL ${GERRIT_OAUTH_URL} | grep -oE "download/v[0-9.]+/${OAUTH_NAME}.jar"| head -n 1)
