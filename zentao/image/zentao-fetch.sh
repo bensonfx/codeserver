@@ -2,7 +2,7 @@
 set -ex
 export LC_ALL=C
 
-VER=${DOCKER_ZENTAO_VER:-10.4}
+VER=${DOCKER_ZENTAO_VER:-10.5}
 ZENTAO_PKG=${WEB_ROOT}/zentao.zip
 ZENTAO_URL=http://sourceforge.net/projects/zentao/files/${VER}/ZenTaoPMS.${VER}.stable.zip/download
 
