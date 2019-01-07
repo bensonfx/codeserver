@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2018-09-04
+### Added
+  - Environment variable LDAP_NOFILE to setup a custom ulimit value #237
+  
+### Fixed
+  - Remove schema ambiguity #204
+  - lidf typo in readme #217
+  - Ignore all the folders started with . #232
+
+### Security 
+  - Fix self-edit security issue #239
+  
+    Thanks to Yann Voumard for reporting this and @jonremy for the fix.
+
 ## [1.2.1] - 2018-05-14
 ### Security
   - The default "write" access to "*" by  "self" in the file  "config/bootstrap/ldif/02-security.ldif" allowed anyone to change all the data about himself. This includes the gid and uid numbers what could lead to serious security issues.
@@ -200,6 +214,7 @@ Environment variable LDAP_REPLICATION_HDB_SYNCPROV changed to LDAP_REPLICATION_D
 ## [0.10.0] - 2015-03-03
 New version initial release, no changelog before this sorry.
 
+[1.2.1]: https://github.com/osixia/docker-openldap/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/osixia/docker-openldap/compare/v1.1.11...v1.2.0
 [1.1.11]: https://github.com/osixia/docker-openldap/compare/v1.1.10...v1.1.11
 [1.1.10]: https://github.com/osixia/docker-openldap/compare/v1.1.9...v1.1.10
