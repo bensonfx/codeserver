@@ -1,9 +1,11 @@
-FROM php:7.3-fpm-alpine
+FROM php:7.2-fpm-alpine
 
-COPY install_lam.sh /tmp
+COPY install_lam.sh entrypoint /wwwroot/
 
 # ENV LANG=zh_CN.UTF-8 \
 #     LANGUAGE=zh_CN:en_US:en \
 ENV TZ=Asia/Shanghai
 
-RUN  /tmp/install_lam.sh
+RUN  /wwwroot/install_lam.sh
+
+CMD ["/wwwroot/entrypoint"]
