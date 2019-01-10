@@ -127,6 +127,8 @@ swarmmode = false
   [backends.ping]
     [backends.ping.servers.server0]
       url = "http://localhost:8082"
+  # [backends.traefik-metrics]
+  #     url = "http://localhost:8083"
 [frontends]
   [frontends.dashboard]
     backend = "dashboard"

@@ -12,12 +12,61 @@ services:
       - "443:443"
     labels:
       - "traefik.docker.network=traefik"
-      - "traefik.frontend.passHostHeader=true"
-  prom:
-    image: prom/prometheus:v2.5.0
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./data/prometheus:/prometheus
+    networks:
+      - "traefik"
+  # ldap:
+  #   image: osixia/openldap
+  #   domainname: "ldap.bensonfx.cc"
+  #   hostname: "ldap.bensonfx.cc"
+  #   ports:
+  #     - "389:389"
+  #     - "636:636"
+  #   restart: unless-stopped
+  #   environment:
+  #     TZ: "Asia/Shanghai"
+  #     LDAP_ORGANISATION: "bensonfx.cc"
+  #     LDAP_DOMAIN: "bensonfx.cc"
+  #     LDAP_ADMIN_PASSWORD: "oUT5DngfuLqr9KRwVh1w+e"
+  #     LDAP_CONFIG_PASSWORD: "eHNntGgELAFWzqavH/1ii6"
+  #     LDAP_TLS_CRT_FILENAME: "bensonfx.cc.crt"
+  #     LDAP_TLS_KEY_FILENAME: "bensonfx.cc.key"
+  #     LDAP_TLS_CA_CRT_FILENAME: "alpha_ca.crt"
+  #     LDAP_TLS_VERIFY_CLIENT: "never"
+  #   volumes:
+  #     - ./data/ldap/database:/var/lib/ldap
+  #     - ./data/ldap/config:/etc/ldap/slapd.d
+  #     - ./data/ssl:/container/service/slapd/assets/certs
+  # lam:
+  #   image: bensonfx/lam
+  #   volumes:
+  #     - "./data/lam:/wwwroot/lam"
+  #   working_dir: /wwwroot
+  # web:
+  #   image: bensonfx/caddy:0.11.1
+  #   restart: always
+  #   environment:
+  #     CADDY_SERVER: http://ldap.bensonfx.cc
+  #     CADDY_ROOT: /wwwroot/lam
+  #     FASTCGI_PATH: lam:9000
+  #   volumes:
+  #     - "./data/lam:/wwwroot/lam"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.port=80"
+  #     #- "traefik.protocol=http"
+  #     - "traefik.frontend.passHostHeader=true"
+  #     - "traefik.frontend.headers.contentTypeNosniff=true"
+  #     - "traefik.frontend.headers.browserXSSFilter=true"
+  #     - "traefik.frontend.rule=Host:ldap.bensonfx.cc"
+  #     - "traefik.docker.network=traefik"
+  #   ports:
+  #     - "8080:80"
+  #   networks:
+  #     - "traefik"
+  #     - "default"
+# networks:
+#   traefik:
+#     external: true
 networks:
   default:
     name: traefik
