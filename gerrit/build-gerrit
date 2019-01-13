@@ -3,7 +3,7 @@ CWD=$(cd `dirname $0`;pwd)
 BUILD_SCRIPT=${CWD}/image/gerrit-fetch.sh
 STABLE_VERSION=2.16.3
 GERRIT_WAR_URL="http://repo1.maven.org/maven2/com/google/gerrit/gerrit-war/${GERRIT_VERSION}/gerrit-war-${GERRIT_VERSION}.war"
-old_wars=$(cd $CWD;ls -1 image/bin/gerrit*.war)
+old_wars=$(cd $CWD;find image/bin -name gerrit*.war)
 GERRIT_URL="https://github.com/GerritCodeReview/gerrit"
 GERRIT_SRC_DIR=${CWD}/image/gerrit
 
@@ -68,7 +68,6 @@ get_gerrit_war() {
         *)
             return
     esac
-    sed -ri "s@bensonfx/gerrit:.*[^\"]@bensonfx/gerrit:${RELEASE_VERSION}@g" /home/gerrit/docker-compose.yml
     ./update_version $RELEASE_VERSION master
     target_war=image/bin/gerrit-${RELEASE_VERSION}.war
     [ -f "${target_war}" ] || cp -fv "$source_war" "$target_war"
