@@ -28,6 +28,52 @@ services:
         gitlab_rails['smtp_tls'] = true
         gitlab_rails['gitlab_email_from'] = 'admin@example.com'
         gitlab_rails['gravatar_plain_url'] = 'http://cn.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon'
+        #gitlab_rails['ldap_enabled'] = true
+        #gitlab_rails['ldap_servers'] = YAML.load <<-EOS
+        #main:
+        #  label: 'Gitlab LDAP'
+        #  host: 'ldap.example.com'
+        #  port: 636
+        #  uid: 'sAMAccountName'
+        #  uid: 'uid'
+        #  encryption: 'simple_tls'
+        #  verify_certificates: true
+        #  bind_dn: 'CN=admin,CN=Users,Dc=example,Dc=com'
+        #  password: 'Password1'
+        #  active_directory: true
+        #  base: 'OU=GitLab INT,Dc=example,Dc=com'
+        #  group_base: 'OU=Global Groups,OU=GitLab INT,Dc=example,Dc=com'
+        #  admin_group: 'Global Admins'
+        #EOS
+        # gitlab_rails['omniauth_allow_single_sign_on'] = ['gitlab']
+        # gitlab_rails['omniauth_auto_link_ldap_user'] = true
+        # gitlab_rails['omniauth_block_auto_created_users'] = true
+        # gitlab_rails['sync_profile_from_provider'] = ['gitlab']
+        # gitlab_rails['sync_profile_attributes'] = ['name', 'email']
+        # gitlab_rails['omniauth_providers'] = [
+        #   {
+        #     'name' => 'oauth2_generic',
+        #     'app_id' => 'your_oauth_app_id',
+        #     'app_secret' => 'your_oauth_secret_key',
+        #     'args' => {
+        #       scope: "read_user",
+        #       client_options: {
+        #           'site' => 'https://git.your_server.com', # including port if necessary
+        #           'user_info_url' => '/api/v4/user'
+        #       },
+        #       user_response_structure: {
+        #           attributes: {
+        #             id: 'id',
+        #             user: 'user',
+        #             state: 'state',
+        #             username: 'username',
+        #             email: 'email',
+        #           } # if the nickname attribute of a user is called 'username'
+        #       },
+        #       name: 'bensonfx_oauth'
+        #     }
+        #   }
+        # ]
     ports:
       - "443:443"
       - "80:80"
