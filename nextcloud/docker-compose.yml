@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  nextcloud:
+    image: nextcloud:latest
+    volumes:
+      - ./data/nextcloud:/var/www/html
+      - ./data/user-files:/data
+    restart: always
+  aria2:
+    image: bensonfx/aria2-ui
+    build: aria2
+    ports:
+      - "6800:6800"
+      # - "80:80"
+      # - "443:443"
+    volumes:
+      - ./data/user-files:/data
+    # volumes:
+    #   - /data/ssl:/root/conf/key
+    #   - ~/data/aria2/aria2.conf:/root/conf/aria2.conf
+    environment:
+      - DOMAIN=:80
+      # - SSL=true
+      # - RPC_SECRET=Hello
+      # - ARIA2_USER=admin
+      # - ARIA2_PWD=password
+      # - ENABLE_AUTH=true
+    restart: always
+
+
