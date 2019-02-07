@@ -1,0 +1,6 @@
+{$CADDY_SERVER} {
+    root {$CADDY_ROOT}
+    index index.php index.htm index.html
+    log /dev/stdout
+    fastcgi / {$FASTCGI_PATH} php
+}
