@@ -60,7 +60,7 @@ get_gerrit_war() {
             sed -ri "s@^default_version=.*@default_version=bazel-stable-\$suffix@g" ${BUILD_SCRIPT}
             source_war=image/bin/stable.war
             if [ ! -f "${source_war}" ];then
-                curl -L ${GERRIT_WAR_URL} -o ${STABLE_GERRIT_WAR}
+                curl -L ${GERRIT_WAR_URL} -o ${source_war}
             fi
             RELEASE_VERSION=${STABLE_VERSION}
             old_images=$(docker images bensonfx/gerrit | grep -oE "[0-9]\.[0-9]+[0-9.]*"|head -1)
@@ -68,7 +68,7 @@ get_gerrit_war() {
         *)
             return
     esac
-    ./update_version $RELEASE_VERSION master
+    ./update_version $RELEASE_VERSION
     target_war=image/bin/gerrit-${RELEASE_VERSION}.war
     [ -f "${target_war}" ] || cp -fv "$source_war" "$target_war"
 }
