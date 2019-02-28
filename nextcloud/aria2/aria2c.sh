@@ -34,7 +34,6 @@ run_aria2() {
     /usr/bin/aria2c --conf-path="/root/conf/aria2.conf" --enable-rpc --rpc-listen-all $param
 }
 
-
 prepare() {
     local aria2_path=/usr/local/www/aria2
     local aria_ng=/root/AriaNg.zip
@@ -46,6 +45,14 @@ prepare() {
         chown -R www-data:root ${aria2_path}
         chmod -R 775 ${aria2_path}
         cd -
+    fi
+
+    echo "check version"
+    local curr_ver=$(cd $aria2_path;grep -oE "buildVersion:\"v[0-9.]+" js/aria-ng-*.min.js |grep -oE "[0-9.]+")
+    local docker_ver=$(echo AriaNg-*.zip | grep -oE "[0-9.]+[0-9]")
+    if ["$curr_ver" != "$docker_ver" ];then
+        echo "update ariaNg version from $curr_ver to $docker_ver"
+        unzip -o $aria_ng
     fi
 }
 
