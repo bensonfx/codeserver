@@ -97,10 +97,10 @@ defaultEntryPoints = ["http", "https"]
 # 日志等级 （默认 ERROR）
 logLevel = "INFO"
 [traefikLog]
-  filePath = "/data/logs/traefik.log"
+  filePath = "/logs/traefik.log"
   format   = "json"
 [accessLog]
-  filePath = "/data/logs/access.log"
+  filePath = "/logs/access.log"
   format = "json"
 ################################################################
 # Docker 后端配置
@@ -110,7 +110,7 @@ logLevel = "INFO"
 # Docker服务后端
 endpoint = "unix:///var/run/docker.sock"
 # 默认域名
-domain = "bensonfx.cc"
+domain = "bensonfx.net"
 # 监控docker变化
 watch = true
 # 使用自定义模板（可选）
@@ -151,10 +151,10 @@ swarmmode = false
   [frontends.dashboard]
     backend = "dashboard"
     [frontends.dashboard.routes.route0]
-      rule = "Host:admin.bensonfx.cc"
+      rule = "Host:admin.bensonfx.net"
   [frontends.ping]
     backend = "ping"
     [frontends.ping.routes.route0]
-      rule = "Host:ping.bensonfx.cc"
+      rule = "Host:ping.bensonfx.net"
     [frontends.ping.routes.route1]
       rule = "ReplacePathRegex: ^/ /ping"
