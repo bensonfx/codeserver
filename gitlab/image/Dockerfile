@@ -1,9 +1,9 @@
 #####################
 #  Building Stage   #
 #####################
-FROM gitlab/gitlab-ce:11.8.1-ce.0 as builder
+FROM gitlab/gitlab-ce:11.9.0-ce.0 as builder
 
-ENV GITLAB_VERSION=11.8.1
+ENV GITLAB_VERSION=11.9.0
 ARG BUILD_SCRIPT=build.sh
 
 COPY ${BUILD_SCRIPT} patch_${GITLAB_VERSION}_zh_CN.diff *.tgz /tmp/
@@ -18,7 +18,7 @@ RUN /tmp/${BUILD_SCRIPT};rm -f /tmp/${BUILD_SCRIPT}
 ######################
 #  Production Stage  #
 ######################
-FROM gitlab/gitlab-ce:11.8.1-ce.0 as production
+FROM gitlab/gitlab-ce:11.9.0-ce.0 as production
 
 RUN set -xe \
     && export DEBIAN_FRONTEND=noninteractive \
@@ -29,7 +29,7 @@ RUN set -xe \
     && rm -rf /var/lib/apt/lists/*
 
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 TZ=Asia/Shanghai
-ENV GITLAB_VERSION=11.8.1 GITLAB_DIR=/opt/gitlab/embedded/service/gitlab-rails
+ENV GITLAB_VERSION=11.9.0 GITLAB_DIR=/opt/gitlab/embedded/service/gitlab-rails
 
 COPY --from=builder ${GITLAB_DIR}/app                   ${GITLAB_DIR}/app
 COPY --from=builder ${GITLAB_DIR}/public                ${GITLAB_DIR}/public
