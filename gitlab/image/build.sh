@@ -38,6 +38,7 @@ add_zh_patch() {
     tar xf /tmp/locale.tgz -C ${GITLAB_DIR}/
     tar xf /tmp/app_assets.tgz -C ${GITLAB_DIR}/
     tar xf /tmp/vendor_assets.tgz -C ${GITLAB_DIR}/
+    chmod -R 755 ${GITLAB_DIR}/locale ${GITLAB_DIR}/app/assets ${GITLAB_DIR}/vendor/assets
 }
 
 # Reference: https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/config/software/gitlab-rails.rb
