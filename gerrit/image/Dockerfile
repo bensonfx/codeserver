@@ -16,7 +16,7 @@ COPY gerrit-*.sh plugins/*.jar bin/gosu* bin/gerrit*.war ${GERRIT_HOME}/
 RUN set -ex && ${GERRIT_HOME}/gerrit-fetch.sh
 
 EXPOSE 8080 29418
-
+WORKDIR ${GERRIT_HOME}
 VOLUME ${GERRIT_SITE}
 
 HEALTHCHECK CMD [ -n "$(ps -ef |grep -v grep| grep GerritCodeReview)" ] || exit 1
