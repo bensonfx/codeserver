@@ -10,7 +10,7 @@ ENV ARIANG_VERSION=1.0.1
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
     && apk add --no-cache wget bash curl openrc gnupg screen aria2 tar
 
-RUN curl https://getcaddy.com | bash -s personal http.filebrowser
+RUN curl https://getcaddy.com | bash -s personal http.realip
 
 ADD conf /root/conf
 COPY aria2c.sh /root
