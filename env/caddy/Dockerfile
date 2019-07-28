@@ -8,7 +8,7 @@ COPY Caddyfile /
 
 RUN set -ex \
     && apk add --no-cache libcap curl bash \
-    && curl -kL https://getcaddy.com | bash -s personal http.filebrowser,http.realip \
+    && curl -kL https://getcaddy.com | bash -s personal http.realip \
     && setcap cap_net_bind_service=+ep `which caddy` \
     && addgroup -g 82 -S www-data \
 	&& adduser -u 82 -D -S -G www-data www-data
