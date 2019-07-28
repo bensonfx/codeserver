@@ -50,7 +50,7 @@ prepare() {
     echo "check version"
     local curr_ver=$(cd $aria2_path;grep -oE "buildVersion:\"v[0-9.]+" js/aria-ng-*.min.js |grep -oE "[0-9.]+")
     local docker_ver=$(echo AriaNg-*.zip | grep -oE "[0-9.]+[0-9]")
-    if ["$curr_ver" != "$docker_ver" ];then
+    if [ "$curr_ver" != "$docker_ver" ];then
         echo "update ariaNg version from $curr_ver to $docker_ver"
         unzip -o $aria_ng
     fi
