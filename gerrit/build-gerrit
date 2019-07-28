@@ -59,7 +59,7 @@ get_gerrit_war() {
         release|stable)
             sed -ri "s@^default_version=.*@default_version=bazel-stable-\$suffix@g" ${BUILD_SCRIPT}
             source_war=image/bin/stable.war
-            if [ ! -f "${source_war}" ];then
+            if [ ! -f "${source_war}" ] || [ "`java -jar ${source_war} version`" != "gerrit version ${STABLE_VERSION}" ];then
                 curl -L ${GERRIT_WAR_URL} -o ${source_war}
             fi
             RELEASE_VERSION=${STABLE_VERSION}
