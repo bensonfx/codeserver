@@ -69,8 +69,8 @@ defaultEntryPoints = ["http", "https"]
         "TLS_RSA_WITH_AES_256_CBC_SHA",
       ]
       [[entryPoints.https.tls.certificates]]
-        certFile = "/data/ssl/bensonfx.cc.crt"
-        keyFile = "/data/ssl/bensonfx.cc.key"
+        certFile = "/data/ssl/example.com.crt"
+        keyFile = "/data/ssl/example.com.key"
     # 控制台端口
     [entryPoints.traefik-api]
       address = ":8081"
@@ -110,7 +110,7 @@ logLevel = "INFO"
 # Docker服务后端
 endpoint = "unix:///var/run/docker.sock"
 # 默认域名
-domain = "bensonfx.net"
+domain = "example.com"
 # 监控docker变化
 watch = true
 # 使用自定义模板（可选）
@@ -151,10 +151,10 @@ swarmmode = false
   [frontends.dashboard]
     backend = "dashboard"
     [frontends.dashboard.routes.route0]
-      rule = "Host:admin.bensonfx.net"
+      rule = "Host:admin.example.com"
   [frontends.ping]
     backend = "ping"
     [frontends.ping.routes.route0]
-      rule = "Host:ping.bensonfx.net"
+      rule = "Host:ping.example.com"
     [frontends.ping.routes.route1]
       rule = "ReplacePathRegex: ^/ /ping"

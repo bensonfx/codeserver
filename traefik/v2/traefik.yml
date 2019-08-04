@@ -1,0 +1,61 @@
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+api:
+  dashboard: true
+  debug: true
+ping: {}
+tls:
+  stores:
+    defaultCertificate:
+      certFile: /data/ssl/example.com_ecc.crt
+      keyFile: /data/ssl/example.com_ecc.key
+  options:
+    default:
+        minVersion: VersionTLS12
+        sniStrict: true
+        mintls13:
+          minVersion: VersionTLS13
+        cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+        - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+        - TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+        - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+        - TLS_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_RSA_WITH_AES_128_CBC_SHA
+        - TLS_RSA_WITH_AES_256_CBC_SHA
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+log:
+  level: DEBUG
+  filePath: "/logs/traefik.log"
+  format: json
+accessLog:
+  filePath: "/logs/access.log"
+  format: json
+providers:
+  docker:
+    watch: true
+    endpoint: "unix:///var/run/docker.sock"
+    defaultRule: "Host(`{{ normalize .Name }}.bensonfx.net`)"
+    exposedbydefault: false
+    usebindportip: false
+    swarmmode: false
+    # tls:
+    #   ca: "/etc/ssl/ca.crt"
+    #   cert: "/etc/ssl/docker.crt"
+    #   key: "/etc/ssl/docker.key"
+    #   insecureSkipVerify: true
+  file:
+    filename: /etc/traefik/dynamic_conf.yml
+    watch: true

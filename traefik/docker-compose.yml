@@ -16,20 +16,20 @@ services:
       - "traefik"
   # ldap:
   #   image: osixia/openldap
-  #   domainname: "ldap.bensonfx.cc"
-  #   hostname: "ldap.bensonfx.cc"
+  #   domainname: "ldap.example.com"
+  #   hostname: "ldap.example.com"
   #   ports:
   #     - "389:389"
   #     - "636:636"
   #   restart: unless-stopped
   #   environment:
   #     TZ: "Asia/Shanghai"
-  #     LDAP_ORGANISATION: "bensonfx.cc"
-  #     LDAP_DOMAIN: "bensonfx.cc"
+  #     LDAP_ORGANISATION: "example.com"
+  #     LDAP_DOMAIN: "example.com"
   #     LDAP_ADMIN_PASSWORD: "oUT5DngfuLqr9KRwVh1w+e"
   #     LDAP_CONFIG_PASSWORD: "eHNntGgELAFWzqavH/1ii6"
-  #     LDAP_TLS_CRT_FILENAME: "bensonfx.cc.crt"
-  #     LDAP_TLS_KEY_FILENAME: "bensonfx.cc.key"
+  #     LDAP_TLS_CRT_FILENAME: "example.com.crt"
+  #     LDAP_TLS_KEY_FILENAME: "example.com.key"
   #     LDAP_TLS_CA_CRT_FILENAME: "alpha_ca.crt"
   #     LDAP_TLS_VERIFY_CLIENT: "never"
   #   volumes:
@@ -45,7 +45,7 @@ services:
   #   image: bensonfx/caddy:0.11.1
   #   restart: always
   #   environment:
-  #     CADDY_SERVER: http://ldap.bensonfx.cc
+  #     CADDY_SERVER: http://ldap.example.com
   #     CADDY_ROOT: /wwwroot/lam
   #     FASTCGI_PATH: lam:9000
   #   volumes:
@@ -57,7 +57,7 @@ services:
   #     - "traefik.frontend.passHostHeader=true"
   #     - "traefik.frontend.headers.contentTypeNosniff=true"
   #     - "traefik.frontend.headers.browserXSSFilter=true"
-  #     - "traefik.frontend.rule=Host:ldap.bensonfx.cc"
+  #     - "traefik.frontend.rule=Host:ldap.example.com"
   #     - "traefik.docker.network=traefik"
   #   ports:
   #     - "8080:80"
