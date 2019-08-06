@@ -36,7 +36,7 @@ run_aria2() {
 
 prepare() {
     local aria2_path=/usr/local/www/aria2
-    local aria_ng=/root/AriaNg.zip
+    local aria_ng=$(find /root/ -name AriaNg-*.zip)
     [ -d "$aria2_path" ] || install -d $aria2_path $aria2_path/Download
     if [ $(ls -A $aria2_path| wc -w) -lt 1 ];then
         cd $aria2_path
