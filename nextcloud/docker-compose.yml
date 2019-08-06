@@ -4,6 +4,7 @@ services:
   aria2:
     image: bensonfx/aria2-ui
     build: aria2
+    restart: always
     ports:
       - "6800:6800"
     volumes:
@@ -13,12 +14,16 @@ services:
       - CADDY_SERVER=:80
       - CADDY_ROOT=/var/www/html/aria2
       # - ARIA2_RPC_SSL=true
+      # - ARIA2_RPC_SECRET=password_example
       # - ARIA2_RPC_KEY=/data/ssl/aria2.key
       # - ARIA2_RPC_CERT=/data/ssl/aria2.crt
-      # - RPC_SECRET=Hello
-      # - ARIA2_USER=admin
-      # - ARIA2_PWD=password
-      # - ENABLE_AUTH=true
-    restart: always
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.passTLSCert=false"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.rule=Host:aria.example.com"
 
