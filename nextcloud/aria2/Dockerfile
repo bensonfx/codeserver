@@ -15,7 +15,7 @@ RUN curl https://getcaddy.com | bash -s personal http.realip
 ADD conf /root/conf
 COPY aria2c.sh /root
 
-COPY Caddyfile SecureCaddyfile /usr/local/caddy/
+COPY Caddyfile /usr/local/caddy/
 
 #AriaNg
 RUN set -ex \

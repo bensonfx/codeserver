@@ -1,35 +1,13 @@
 #! /bin/bash -eu
-run() {
-    echo "Run aria2c and ariaNG"
-    if [ "$ARIA2_ENABLE_AUTH" = "true" ]; then
-        echo "Using Basic Auth config file "
-        CADDY_FILE=/usr/local/caddy/SecureCaddyfile
-    else
-        echo "Using caddy without Basic Auth"
-        CADDY_FILE=/usr/local/caddy/Caddyfile
-    fi
-
-    if [ "$ARIA2_RPC_SSL" = "true" ]; then
-        echo "Start aria2 with secure config"
-
-        /usr/bin/aria2c --conf-path="/root/conf/aria2.conf" -D  \
-        --enable-rpc --rpc-listen-all  \
-        --rpc-certificate=/root/conf/key/aria2.crt \
-        --rpc-private-key=/root/conf/key/aria2.key \
-        --rpc-secret="$ARIA2_RPC_SECRET" --rpc-secure \
-        && caddy -quic --conf ${CADDY_FILE}
-    else
-        echo "Start aria2 with standard mode"
-        /usr/bin/aria2c --conf-path="/root/conf/aria2.conf" -D \
-        --enable-rpc --rpc-listen-all \
-        && caddy -quic --conf ${CADDY_FILE}
-    fi
-}
 
 run_aria2() {
     local param=
     if [ "$ARIA2_RPC_SSL" = "true" ]; then
-        param="--rpc-certificate=/root/conf/key/aria2.crt --rpc-private-key=/root/conf/key/aria2.key --rpc-secret="$ARIA2_RPC_SECRET" --rpc-secure"
+        param="$param --rpc-secret="$ARIA2_RPC_SECRET" --rpc-secure"
+    fi
+
+    if [ -f "${ARIA2_RPC_KEY}" ] && [ -f "${ARIA2_RPC_CERT}" ];then
+        param="$param --rpc-certificate=${ARIA2_RPC_CERT} --rpc-private-key=${ARIA2_RPC_KEY}"
     fi
     /usr/bin/aria2c --conf-path="/root/conf/aria2.conf" --enable-rpc --rpc-listen-all $param
 }
@@ -65,7 +43,6 @@ prepare() {
 }
 
 prepare
-#run
 run_aria2
 
 

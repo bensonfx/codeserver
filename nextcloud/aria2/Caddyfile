@@ -1,12 +1,13 @@
-{$DOMAIN} {
-  root /usr/local/www/aria2
-  timeouts none
-  gzip
-  log stdout
-  errors stdout
+{$CADDY_SERVER} {
+    root {$CADDY_ROOT}
+    index index.htm index.html
+    timeouts none
+    gzip
+    log /dev/stdout
+    errors stdout
 }
 
-{$DOMAIN}/files {
+{$CADDY_SERVER}/files {
   filebrowser / /data
 }
 
