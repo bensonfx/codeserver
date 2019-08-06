@@ -14,7 +14,11 @@ run_aria2() {
 
 prepare() {
     #local aria2_path=/usr/local/www/aria2
-    aria2_path=/var/www/html/aria
+    local aria2_path=${CADDY_ROOT}
+    if [ -z "$aria2_path" ] || [ ! -d "${aria2_path}" ];then
+        echo "$aria2_path do not exist"
+        return 1
+    fi
 
     local aria_ng=$(find /root/ -name AriaNg-*.zip)
     [ -d "$aria2_path" ] || install -d $aria2_path $aria2_path/Download
@@ -31,7 +35,11 @@ prepare() {
     echo "check version"
     local curr_ver=$(cd $aria2_path;grep -oE "buildVersion:\"v[0-9.]+" js/aria-ng-*.min.js |grep -oE "[0-9.]+")
     local docker_ver=$(find /root -name AriaNg-*.zip | grep -oE "[0-9.]+[0-9]")
-    [ -z "$docker_ver" ] && return
+
+    if [ -z "$docker_ver" ];then
+        echo "can not get ariaNg package"
+        return 0
+    fi
 
     if [ "$curr_ver" != "$docker_ver" ];then
         echo "update ariaNg version from $curr_ver to $docker_ver"
@@ -40,9 +48,8 @@ prepare() {
         unzip -o $aria_ng
         cd -
     fi
+    return 0
 }
 
 prepare
 run_aria2
-
-
