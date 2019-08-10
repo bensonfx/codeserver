@@ -14,3 +14,5 @@ gerrit/image/bin/stable.war
 gerrit/image/bin/gerrit*.war
 gerrit/image/gerrit
 gerrit/image/plugins
+
+traefik-aria2-with-webui

@@ -1,0 +1,3 @@
+[submodule "traefik-aria2-with-webui"]
+	path = traefik-aria2-with-webui
+	url = https://github.com/soulteary/traefik-aria2-with-webui.git
