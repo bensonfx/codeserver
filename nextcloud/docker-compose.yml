@@ -2,7 +2,7 @@ version: '3'
 
 services:
   aria2:
-    image: bensonfx/aria2-ui
+    image: bensonfx/aria2-ui:v2
     build: aria2
     restart: always
     ports:
