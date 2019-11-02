@@ -1,8 +1,8 @@
-version: "3.5"
+version: "3"
 services:
   gerrit:
     build: "image"
-    image: "bensonfx/gerrit:3.0.2"
+    image: "bensonfx/gerrit:3.0.3"
     restart: unless-stopped
     hostname: "review.example.com"
     depends_on:
