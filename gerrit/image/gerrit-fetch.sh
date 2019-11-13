@@ -11,15 +11,12 @@ GERRITFORGE_URL=https://gerrit-ci.gerritforge.com
 PLUGIN_ARTIFACT_URI=lastSuccessfulBuild/artifact/bazel-genfiles/plugins
 GERRIT_OAUTH_URL="https://github.com/davido/gerrit-oauth-provider/releases"
 
-plugin_list="IMPORTER GITILES DELPROJ EVENTSLOG LFS"
+plugin_list="IMPORTER EVENTSLOG LFS"
 suffix=$(echo ${GERRIT_VERSION} | sed -r "s@([0-9]\.[0-9]+).*@\1@g")
 default_version=bazel-stable-$suffix
 
 IMPORTER_NAME=importer
 IMPORTER_VERSION=bazel-master
-GITILES_NAME=gitiles
-GITILES_VERSION=bazel-master-stable-2.16
-DELPROJ_NAME=delete-project
 EVENTSLOG_NAME=events-log
 EVENTSLOG_VERSION=bazel-master
 LFS_NAME=lfs
@@ -35,7 +32,7 @@ clean() {
 init_env() {
     echo " # Preparing environment ..."
     sed -i "s@http://archive.ubuntu.com@http://mirrors.aliyun.com@g" /etc/apt/sources.list
-    if ! id -u ${GERRIT_USER} > /dev/null 2>&1;then
+    if ! id -u ${GERRIT_USER} >/dev/null 2>&1; then
         useradd -Ulms /sbin/nologin ${GERRIT_USER}
     fi
     #rename gerrit war to gerrit.war
@@ -47,7 +44,7 @@ init_env() {
     chown -R ${GERRIT_USER} ${GERRIT_HOME}
     apt-get update
     # apt-get install -yqq --no-install-recommends openjdk-8-jdk curl git openssh-client vim
-    if [ -z "$(which java)" ];then
+    if [ -z "$(which java)" ]; then
         apt-get install -yqq --no-install-recommends openjdk-8-jdk curl git openssh-client
     fi
     clean
@@ -55,7 +52,7 @@ init_env() {
 
 fetch_gosu() {
     local gosu_bin="${GERRIT_HOME}/gosu*"
-    if [ -f $gosu_bin ];then
+    if [ -f $gosu_bin ]; then
         mv -fv $gosu_bin $GOSU
         return
     fi
@@ -67,7 +64,7 @@ fetch_gosu() {
 }
 
 fetch_plugins() {
-    for PLUGIN in ${plugin_list};do
+    for PLUGIN in ${plugin_list}; do
         eval local version=\${${PLUGIN}_VERSION:=$default_version}
         eval local name=\${${PLUGIN}_NAME}
         local plugin_url=${GERRITFORGE_URL}/job/plugin-${name}-${version}/${PLUGIN_ARTIFACT_URI}/${name}/${name}.jar
@@ -85,7 +82,7 @@ fetch_plugins() {
 }
 
 fetch_gerrit_war() {
-    if [ ! -f "${GERRIT_WAR}" ];then
+    if [ ! -f "${GERRIT_WAR}" ]; then
         echo "# downloading $(basename ${GERRIT_WAR}) ${GERRIT_VERSION} ..."
         curl -L ${GERRIT_WAR_URL} -o ${GERRIT_WAR}
     fi
@@ -93,15 +90,18 @@ fetch_gerrit_war() {
 }
 
 case $1 in
-    init)
-        init_env;;
-    gerrit)
-        fetch_gerrit_war;;
-    plugins)
-        fetch_plugins;;
-    *)
-        init_env
-        fetch_gerrit_war
-        fetch_plugins
-        ;;
+init)
+    init_env
+    ;;
+gerrit)
+    fetch_gerrit_war
+    ;;
+plugins)
+    fetch_plugins
+    ;;
+*)
+    init_env
+    fetch_gerrit_war
+    fetch_plugins
+    ;;
 esac
