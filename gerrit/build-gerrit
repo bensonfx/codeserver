@@ -1,7 +1,7 @@
 #!/bin/sh
 CWD=$(cd `dirname $0`;pwd)
 BUILD_SCRIPT=${CWD}/image/gerrit-fetch.sh
-STABLE_VERSION=3.1.2
+STABLE_VERSION=3.1.3
 GERRIT_WAR_URL="http://repo1.maven.org/maven2/com/google/gerrit/gerrit-war/${STABLE_VERSION}/gerrit-war-${STABLE_VERSION}.war"
 old_wars=$(cd $CWD;find image/bin -name gerrit*.war)
 GERRIT_URL="https://github.com/GerritCodeReview/gerrit"
