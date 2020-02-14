@@ -4,12 +4,13 @@ global:
 api:
   dashboard: true
   debug: true
-ping: {}
+ping:
+  entryPoint: "ping"
 tls:
   stores:
     defaultCertificate:
-      certFile: /data/ssl/example.com_ecc.crt
-      keyFile: /data/ssl/example.com_ecc.key
+      certFile: /data/ssl/bensonfx.net.crt
+      keyFile: /data/ssl/bensonfx.net.key
   options:
     default:
         minVersion: VersionTLS12
@@ -36,6 +37,8 @@ entryPoints:
     address: ":80"
   https:
     address: ":443"
+  ping:
+    address: ":8082"
 log:
   level: DEBUG
   filePath: "/logs/traefik.log"
@@ -49,6 +52,7 @@ providers:
     endpoint: "unix:///var/run/docker.sock"
     defaultRule: "Host(`{{ normalize .Name }}.bensonfx.net`)"
     exposedbydefault: false
+    network: traefik
     usebindportip: false
     swarmmode: false
     # tls:
@@ -59,3 +63,15 @@ providers:
   file:
     filename: /etc/traefik/dynamic_conf.yml
     watch: true
+certificatesResolvers:
+  le:
+    acme:
+      email: admin@bensonfx.net
+      storage: acme.json
+      keyType: EC256
+      dnsChallenge:
+        provider: cloudflare
+        delayBeforeCheck: 15
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
