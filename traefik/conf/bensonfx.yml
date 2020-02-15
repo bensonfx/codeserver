@@ -1,0 +1,67 @@
+http:
+  middlewares:
+    basic-auth:
+      basicAuth:
+        users:
+          - "benson:$apr1$T7iXkMR7$UhhrVkDs7R8oVwCUgHrfN0"
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: false
+        port: 5443
+    my-headers:
+      Headers:
+        contentTypeNosniff: true
+        browserXSSFilter: true
+        sslRedirect: true
+    gzip:
+      compress: {}
+
+  services:
+    # tricks
+    # https://github.com/containous/traefik/issues/4863#issuecomment-491093096
+    dummy:
+      loadBalancer:
+        servers:
+          - url: "" # or url: "localhost"
+    dsphoto:
+      loadBalancer:
+        servers:
+          - url: "http://nas.example.com"
+    nas:
+      loadBalancer:
+        servers:
+          - url: "http://nas.example.com:5000"
+        # [http.routers]
+        # [http.routers.https-redirect]
+        #   entryPoints = ["http"]
+        #   rule = "HostRegexp(`{any:.*}`)"
+        #   middlewares = ["https-redirect"]
+        #   service = "noop"
+  routers:
+    routers:
+      https-redirect:
+        entryPoints:
+          - http
+        rule: "HostRegexp(`{any:.*}`)"
+        middlewares: ["https-redirect"]
+        service: dummy
+    dashboard:
+      entryPoints:
+        - https
+      service: api@internal
+      middlewares: ["basic-auth", "https-redirect"]
+      rule: "Host(`admin.example.com`)"
+      tls: {}
+    dsphoto:
+      entryPoints:
+        - https
+      service: dsphoto
+      rule: "Host(`photo.example.com`)"
+      tls: {}
+    nas:
+      entryPoints:
+        - https
+      service: nas
+      rule: "Host(`nas.example.com`)"
+      tls: {}

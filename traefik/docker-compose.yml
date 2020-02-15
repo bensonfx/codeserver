@@ -1,26 +1,35 @@
 version: '3'
 services:
   traefik:
-    image: traefik
+    container_name: traefik-v2
+    image: traefik:v2.1
+    command: traefik --configFile /etc/traefik.yml
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider localhost:8082/ping || exit 1"]
+    environment:
+      TZ: "Asia/Shanghai"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./data/traefik.toml:/etc/traefik/traefik.toml
-      - ./data/ssl:/data/ssl
-      - ./logs:/data/logs
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ./traefik.yml:/etc/traefik.yml:ro
+    - ./conf:/etc/traefik/conf:ro
+    - ./ssl:/data/ssl:ro
+    - ./logs:/data/logs
     ports:
-      - "80:80"
-      - "443:443"
+    - "80:80"
+    - "443:443"
     labels:
-      - "traefik.docker.network=traefik"
+    - "traefik.docker.network=traefik"
+    - "traefik.http.routers.traefik.service=api@internal"
     networks:
-      - "traefik"
+    - "traefik"
   # ldap:
   #   image: osixia/openldap
   #   domainname: "ldap.example.com"
   #   hostname: "ldap.example.com"
   #   ports:
-  #     - "389:389"
-  #     - "636:636"
+  #   - "389:389"
+  #   - "636:636"
   #   restart: unless-stopped
   #   environment:
   #     TZ: "Asia/Shanghai"
@@ -33,13 +42,13 @@ services:
   #     LDAP_TLS_CA_CRT_FILENAME: "alpha_ca.crt"
   #     LDAP_TLS_VERIFY_CLIENT: "never"
   #   volumes:
-  #     - ./data/ldap/database:/var/lib/ldap
-  #     - ./data/ldap/config:/etc/ldap/slapd.d
-  #     - ./data/ssl:/container/service/slapd/assets/certs
+  #   - ./data/ldap/database:/var/lib/ldap
+  #   - ./data/ldap/config:/etc/ldap/slapd.d
+  #   - ./data/ssl:/container/service/slapd/assets/certs
   # lam:
   #   image: bensonfx/lam
   #   volumes:
-  #     - "./data/lam:/wwwroot/lam"
+  #   - "./data/lam:/wwwroot/lam"
   #   working_dir: /wwwroot
   # web:
   #   image: bensonfx/caddy:0.11.1
@@ -51,19 +60,19 @@ services:
   #   volumes:
   #     - "./data/lam:/wwwroot/lam"
   #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.port=80"
-  #     #- "traefik.protocol=http"
-  #     - "traefik.frontend.passHostHeader=true"
-  #     - "traefik.frontend.headers.contentTypeNosniff=true"
-  #     - "traefik.frontend.headers.browserXSSFilter=true"
-  #     - "traefik.frontend.rule=Host:ldap.example.com"
-  #     - "traefik.docker.network=traefik"
+  #   - "traefik.enable=true"
+  #   - "traefik.port=80"
+  #   #- "traefik.protocol=http"
+  #   - "traefik.frontend.passHostHeader=true"
+  #   - "traefik.frontend.headers.contentTypeNosniff=true"
+  #   - "traefik.frontend.headers.browserXSSFilter=true"
+  #   - "traefik.frontend.rule=Host:ldap.example.com"
+  #   - "traefik.docker.network=traefik"
   #   ports:
-  #     - "8080:80"
+  #   - "8080:80"
   #   networks:
-  #     - "traefik"
-  #     - "default"
+  #   - "traefik"
+  #   - "default"
 # networks:
 #   traefik:
 #     external: true
