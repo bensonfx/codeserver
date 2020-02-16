@@ -73,9 +73,6 @@ services:
   #   networks:
   #   - "traefik"
   #   - "default"
-# networks:
-#   traefik:
-#     external: true
 networks:
-  default:
-    name: traefik
+  traefik:
+    external: true

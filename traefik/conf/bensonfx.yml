@@ -9,12 +9,12 @@ http:
         scheme: https
         permanent: false
         port: 5443
-    my-headers:
+    custom-headers:
       Headers:
         contentTypeNosniff: true
         browserXSSFilter: true
         sslRedirect: true
-    gzip:
+    content-compress:
       compress: {}
 
   services:
