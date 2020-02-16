@@ -32,25 +32,22 @@ http:
       loadBalancer:
         servers:
           - url: "http://nas.example.com:5000"
-        # [http.routers]
-        # [http.routers.https-redirect]
-        #   entryPoints = ["http"]
-        #   rule = "HostRegexp(`{any:.*}`)"
-        #   middlewares = ["https-redirect"]
-        #   service = "noop"
+
   routers:
-    routers:
-      https-redirect:
-        entryPoints:
-          - http
-        rule: "HostRegexp(`{any:.*}`)"
-        middlewares: ["https-redirect"]
-        service: dummy
+    https-redirect:
+      entryPoints:
+        - http
+      rule: "HostRegexp(`{any:.*}`)"
+      middlewares:
+        - "https-redirect"
+      service: dummy
     dashboard:
       entryPoints:
         - https
       service: api@internal
-      middlewares: ["basic-auth", "https-redirect"]
+      middlewares:
+        - "basic-auth"
+        # - "https-redirect"
       rule: "Host(`admin.example.com`)"
       tls: {}
     dsphoto:
