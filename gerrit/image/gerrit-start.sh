@@ -187,7 +187,6 @@ init_plugins() {
 
     #Section gitweb/gitiles
     [ -z "$GITWEB_TYPE" ] && export GITWEB_TYPE=gitweb
-    install_plugin $GITWEB_TYPE
     case $GITWEB_TYPE in
         gitiles)
            set_gitiles_config gerrit.linkname $GITWEB_TYPE
@@ -209,7 +208,6 @@ gen_version() {
 }
 
 update_plugins() {
-    [ "$GITWEB_TYPE" = "gitiles" ] && install_plugin $GITWEB_TYPE force
     [ "${AUTH_TYPE}" = 'OAUTH' ]  && install_plugin "gerrit-oauth-provider" force
 }
 
@@ -218,6 +216,12 @@ do_init_gerrit() {
         --batch --no-auto-start --install-all-plugins \
         -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
     ret=$?
+
+    #init java config
+    set_gerrit_config --add container.javaOptions "-Djava.security.egd=file:/dev/./urandom"
+    set_gerrit_config --add container.javaOptions "--add-opens java.base/java.net=ALL-UNNAMED"
+    set_gerrit_config --add container.javaOptions "--add-opens java.base/java.lang.invoke=ALL-UNNAMED"
+
     # redinex
     echo "Reindexing..."
     gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" reindex -d "${GERRIT_SITE}"

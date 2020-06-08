@@ -1,10 +1,10 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 MAINTAINER Benson Yan <fuxin04@gmail.com>
 
 # Overridable defaults
 ENV GERRIT_HOME=/var/gerrit \
-    GERRIT_VERSION=3.1.4 \
+    GERRIT_VERSION=3.2.0 \
     GERRIT_USER=gerrit
 
 ENV GERRIT_SITE=${GERRIT_HOME}/review_site \

@@ -45,7 +45,7 @@ init_env() {
     apt-get update
     # apt-get install -yqq --no-install-recommends openjdk-8-jdk curl git openssh-client vim
     if [ -z "$(which java)" ]; then
-        apt-get install -yqq --no-install-recommends openjdk-8-jdk curl git openssh-client
+        apt-get install -yqq --no-install-recommends openjdk-11-jdk curl git openssh-client
     fi
     clean
 }
