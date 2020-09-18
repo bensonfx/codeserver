@@ -2,7 +2,7 @@ version: '3'
 services:
   traefik:
     container_name: traefik-v2
-    image: traefik:v2.1
+    image: traefik:v2.3
     command: traefik --configFile /etc/traefik.yml
     restart: unless-stopped
     healthcheck:
