@@ -6,15 +6,20 @@ services:
     command: traefik --configFile /etc/traefik.yml
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider localhost:8082/ping || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider localhost:8080/ping || exit 1"]
+    command: traefik --configFile /etc/traefik.yml
     environment:
       TZ: "Asia/Shanghai"
+      CF_API_EMAIL: ${CF_API_EMAIL}
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
+      CF_ZONE_API_TOKEN: ${CF_ZONE_API_TOKEN}
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro
-    - ./traefik.yml:/etc/traefik.yml:ro
-    - ./conf:/etc/traefik/conf:ro
-    - ./ssl:/data/ssl:ro
-    - ./logs:/data/logs
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik.yml:ro
+      - ./conf:/etc/traefik/conf:ro
+      - ./ssl:/data/ssl
+      - ./logs:/logs
     ports:
     - "80:80"
     - "443:443"

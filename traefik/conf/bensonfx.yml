@@ -3,19 +3,23 @@ http:
     basic-auth:
       basicAuth:
         users:
-          - "benson:$apr1$T7iXkMR7$UhhrVkDs7R8oVwCUgHrfN0"
+          - "benson:$apr1$O1f3HVwq$4.CPyV0cFXEACFhO3keUk0"
     https-redirect:
       redirectScheme:
         scheme: https
         permanent: false
         port: 5443
     custom-headers:
-      Headers:
+      headers:
         contentTypeNosniff: true
         browserXSSFilter: true
         sslRedirect: true
     content-compress:
       compress: {}
+    behind-proxy-headers:
+      headers:
+        hostsProxyHeaders:
+          - "X-Forwarded-For"
 
   services:
     # tricks
@@ -38,16 +42,14 @@ http:
       entryPoints:
         - http
       rule: "HostRegexp(`{any:.*}`)"
+      service: "dummy"
       middlewares:
         - "https-redirect"
-      service: dummy
     dashboard:
       entryPoints:
         - https
       service: api@internal
-      middlewares:
-        - "basic-auth"
-        # - "https-redirect"
+      middlewares: ["basic-auth", "https-redirect"]
       rule: "Host(`admin.example.com`)"
       tls: {}
     dsphoto:
@@ -60,5 +62,11 @@ http:
       entryPoints:
         - https
       service: nas
-      rule: "Host(`nas.example.com`)"
-      tls: {}
+      rule: "Host(`www.example.com`)"
+      tls:
+        certResolver: le
+        domains:
+          - main: "*.example.com"
+            sans:
+              - "example.com"
+              - "*.example.com"
