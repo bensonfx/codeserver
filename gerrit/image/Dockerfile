@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-MAINTAINER Benson Yan <fuxin04@gmail.com>
+LABEL maintainer="Benson Yan <fuxin04@gmail.com>"
 
 # Overridable defaults
 ENV GERRIT_HOME=/var/gerrit \
