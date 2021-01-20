@@ -3,11 +3,40 @@ services:
   traefik:
     container_name: traefik-v2
     image: traefik:v2.3
-    command: traefik --configFile /etc/traefik.yml
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider localhost:8080/ping || exit 1"]
-    command: traefik --configFile /etc/traefik.yml
+    command:
+      - "--global.sendanonymoususage=false"
+      - "--global.checknewversion=false"
+      - "--api.dashboard=true"
+      # - "--api.debug=true"
+      - "--ping=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--entryPoints.web.forwardedHeaders.trustedIPs=172.18.0.0/24,192.168.31.0/24"
+      - "--log.level=WARN"
+      - "--log.filePath=/logs/traefik.log"
+      - "--log.format=json"
+      - "--accesslog.filepath=/logs/access.log"
+      - "--accesslog.format=json"
+      - "--providers.docker=true"
+      - "--providers.docker.watch=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.useBindPortIP=false"
+      - "--providers.docker.network=traefik"
+      - "--providers.docker.swarmMode=false"
+      - "--providers.file=true"
+      - "--providers.file.directory=/etc/traefik/conf"
+      - "--providers.file.debugloggeneratedtemplate=true"
+      - "--certificatesresolvers.le.acme.email=admin@example.com"
+      - "--certificatesresolvers.le.acme.storage=/data/ssl/acme.json"
+      - "--certificatesresolvers.le.acme.keytype=EC256"
+      - "--certificatesresolvers.le.acme.dnschallenge=true"
+      - "--certificatesresolvers.le.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.le.acme.dnschallenge.delaybeforecheck=15"
+      - "--certificatesresolvers.le.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
     environment:
       TZ: "Asia/Shanghai"
       CF_API_EMAIL: ${CF_API_EMAIL}
@@ -15,17 +44,36 @@ services:
       CF_ZONE_API_TOKEN: ${CF_ZONE_API_TOKEN}
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.yml:/etc/traefik.yml:ro
       - ./conf:/etc/traefik/conf:ro
       - ./ssl:/data/ssl
       - ./logs:/logs
     ports:
-    - "80:80"
-    - "443:443"
+      - "80:80"
+      - "443:443"
     labels:
-    - "traefik.docker.network=traefik"
-    - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.traefik.service=api@internal"
+      # 默认请求转发 https 端口
+      - "traefik.http.routers.traefik-dash-default.middlewares=https-redirect@file"
+      - "traefik.http.routers.traefik-dash-default.entrypoints=http"
+      - "traefik.http.routers.traefik-dash-default.rule=Host(`admin.example.com`)"
+      - "traefik.http.routers.traefik-dash.service=dashboard@internal"
+      # 处理网页
+      - "traefik.http.middlewares.basic-auth.basicauth.users=$AUTH_USER_LIST"
+      - "traefik.http.routers.traefik-dash-web.middlewares=basic-auth"
+      - "traefik.http.routers.traefik-dash-web.entrypoints=https"
+      - "traefik.http.routers.traefik-dash-web.rule=Host(`admin.example.com`) && PathPrefix(`/`)"
+      - "traefik.http.routers.traefik-dash-web.tls=true"
+      - "traefik.http.routers.traefik-dash-web.service=dashboard@internal"
+      # 处理接口
+      - "traefik.http.routers.traefik-dash-api.entrypoints=https"
+      - "traefik.http.routers.traefik-dash-api.rule=Host(`admin.example.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.traefik-dash-api.tls=true"
+      - "traefik.http.routers.traefik-dash-api.service=api@internal"
     networks:
     - "traefik"
   # ldap:

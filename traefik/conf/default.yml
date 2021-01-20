@@ -1,9 +1,35 @@
+http:
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: false
+        port: 5443
+    content-compress:
+      compress: {}
+
+  services:
+    # tricks https://github.com/containous/traefik/issues/4863#issuecomment-491093096
+    dummy:
+      loadBalancer:
+        servers:
+          - url: "" # or url: "localhost"
+
+  routers:
+    https-redirect:
+      entryPoints:
+        - http
+      rule: "HostRegexp(`{any:.*}`)"
+      service: "dummy"
+      middlewares:
+        - "https-redirect"
+
 tls:
-  certificates:
-    - certFile: /data/ssl/example.com.crt
-      keyFile: /data/ssl/example.com.key
-      stores:
-        - default
+  # certificates:
+  #   - certFile: /data/ssl/example.com.crt
+  #     keyFile: /data/ssl/example.com.key
+  #     stores:
+  #       - default
   options:
     default:
       minVersion: VersionTLS12
@@ -24,3 +50,4 @@ tls:
         - TLS_RSA_WITH_AES_256_GCM_SHA384
         - TLS_RSA_WITH_AES_128_CBC_SHA
         - TLS_RSA_WITH_AES_256_CBC_SHA
+
