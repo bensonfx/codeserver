@@ -1,28 +1,28 @@
 http:
-  middlewares:
-    https-redirect:
-      redirectScheme:
-        scheme: https
-        permanent: false
-        port: 5443
-    content-compress:
-      compress: {}
+  # middlewares:
+  #   https-redirect:
+  #     redirectScheme:
+  #       scheme: https
+  #       permanent: false
+  #       port: 5443
+  #   content-compress:
+  #     compress: {}
 
-  services:
-    # tricks https://github.com/containous/traefik/issues/4863#issuecomment-491093096
-    dummy:
-      loadBalancer:
-        servers:
-          - url: "" # or url: "localhost"
+  # services:
+  #   # tricks https://github.com/containous/traefik/issues/4863#issuecomment-491093096
+  #   dummy:
+  #     loadBalancer:
+  #       servers:
+  #         - url: "" # or url: "localhost"
 
-  routers:
-    https-redirect:
-      entryPoints:
-        - http
-      rule: "HostRegexp(`{any:.*}`)"
-      service: "dummy"
-      middlewares:
-        - "https-redirect"
+  # routers:
+  #   https-redirect:
+  #     entryPoints:
+  #       - http
+  #     rule: "HostRegexp(`{any:.*}`)"
+  #     service: "dummy"
+  #     middlewares:
+  #       - "https-redirect"
 
 tls:
   # certificates:

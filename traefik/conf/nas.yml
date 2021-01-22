@@ -20,10 +20,4 @@ http:
         - https
       service: nas
       rule: "Host(`www.example.com`)"
-      tls:
-        certResolver: le
-        domains:
-          - main: "*.example.com"
-            sans:
-              - "example.com"
-              - "*.example.com"
+      tls: {}

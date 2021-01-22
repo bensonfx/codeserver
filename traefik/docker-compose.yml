@@ -1,8 +1,8 @@
 version: '3'
 services:
   traefik:
-    container_name: traefik-v2
-    image: traefik:v2.3
+    container_name: traefik
+    image: traefik:v2.4
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider localhost:8080/ping || exit 1"]
@@ -13,8 +13,15 @@ services:
       # - "--api.debug=true"
       - "--ping=true"
       - "--entrypoints.http.address=:80"
+      - "--entryPoints.http.forwardedHeaders.trustedIPs=$TRUST_IPS"
+      - "--entrypoints.http.http.redirections.entryPoint.to=https"
+      - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
       - "--entrypoints.https.address=:443"
-      - "--entryPoints.web.forwardedHeaders.trustedIPs=172.18.0.0/24,192.168.31.0/24"
+      - "--entryPoints.https.forwardedHeaders.trustedIPs=$TRUST_IPS"
+      - "--entrypoints.https.http.tls.certResolver=le"
+      - "--entrypoints.https.http.tls.domains[0].main=$CERT_DOMAIN_MAIN"
+      - "--entrypoints.https.http.tls.domains[0].sans=$CERT_DOMAIN_SANS"
       - "--log.level=WARN"
       - "--log.filePath=/logs/traefik.log"
       - "--log.format=json"
@@ -58,10 +65,10 @@ services:
       - "traefik.docker.network=traefik"
       - "traefik.http.routers.traefik.service=api@internal"
       # 默认请求转发 https 端口
-      - "traefik.http.routers.traefik-dash-default.middlewares=https-redirect@file"
-      - "traefik.http.routers.traefik-dash-default.entrypoints=http"
-      - "traefik.http.routers.traefik-dash-default.rule=Host(`admin.example.com`)"
-      - "traefik.http.routers.traefik-dash.service=dashboard@internal"
+      # - "traefik.http.routers.traefik-dash-default.middlewares=https-redirect@file"
+      # - "traefik.http.routers.traefik-dash-default.entrypoints=http"
+      # - "traefik.http.routers.traefik-dash-default.rule=Host(`admin.example.com`)"
+      # - "traefik.http.routers.traefik-dash.service=dashboard@internal"
       # 处理网页
       - "traefik.http.middlewares.basic-auth.basicauth.users=$AUTH_USER_LIST"
       - "traefik.http.routers.traefik-dash-web.middlewares=basic-auth"
