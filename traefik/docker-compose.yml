@@ -83,7 +83,9 @@ services:
       - "traefik.http.routers.traefik-dash-api.tls=true"
       - "traefik.http.routers.traefik-dash-api.service=api@internal"
     networks:
-    - "traefik"
+      - "traefik"
+    # extra_hosts:
+    #   - host.docker.internal:172.17.0.1
   # ldap:
   #   image: osixia/openldap
   #   domainname: "ldap.example.com"
