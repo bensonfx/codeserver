@@ -1,0 +1,55 @@
+[global]
+  checkNewVersion = false
+  sendAnonymousUsage = false
+[log]
+  # level = "DEBUG"
+  filePath = "/logs/traefik.log"
+  format = "json"
+[accessLog]
+  filePath = "/logs/access.log"
+  format = "json"
+[api]
+  dashboard = true
+  # insecure = true
+[ping]
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+    [entryPoints.http.forwardedHeaders]
+      trustedIPs = ["127.0.0.1/32", "172.18.0.0/24", "192.168.31.0/24"]
+    [entryPoints.http.http.redirections]
+      [entryPoints.http.http.redirections.entryPoint]
+        to = "https"
+        scheme = "https"
+  [entryPoints.https]
+    address = ":443"
+    [entryPoints.https.forwardedHeaders]
+      trustedIPs = ["127.0.0.1/32", "172.18.0.0/24", "192.168.31.0/24"]
+    [entryPoints.https.http.tls]
+      certResolver = "le"
+      [[entryPoints.https.http.tls.domains]]
+        main = "*.example.com"
+        sans = ["*.example.com", "example.com"]
+
+[providers]
+  [providers.docker]
+    watch = true
+    exposedByDefault = false
+    endpoint = "unix:///var/run/docker.sock"
+    useBindPortIP = false
+    network = "traefik"
+    swarmMode = false
+  [providers.file]
+    watch = true
+    directory = "/etc/traefik/conf"
+    # debugLogGeneratedTemplate = true
+
+[certificatesResolvers.le.acme]
+  email = "admin@example.com"
+  storage = "/data/ssl/acme.json"
+  keyType = "EC256"
+  [certificatesResolvers.le.acme.dnsChallenge]
+    provider = "cloudflare"
+    delayBeforeCheck = 15
+    resolvers = ["1.1.1.1:53", "8.8.8.8:53"]

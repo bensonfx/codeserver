@@ -1,0 +1,21 @@
+[http.services]
+  [http.services.dsphoto.loadBalancer]
+    passHostHeader = true
+    [[http.services.dsphoto.loadBalancer.servers]]
+      url = "http://photo.example.com"
+  [http.services.nas.loadBalancer]
+    passHostHeader = true
+    [[http.services.nas.loadBalancer.servers]]
+      url = "http://nas.example.com:5000"
+
+[http.routers]
+  [http.routers.dsphoto]
+    entryPoints = ["https"]
+    rule = "Host(`photo.example.com`)"
+    service = "dsphoto"
+    [http.routers.dsphoto.tls]
+  [http.routers.nas]
+    entryPoints = ["https"]
+    rule = "Host(`nas.example.com`)"
+    service = "nas"
+    [http.routers.nas.tls]
