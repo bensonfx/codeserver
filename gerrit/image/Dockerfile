@@ -4,7 +4,7 @@ LABEL maintainer="Benson Yan <fuxin04@gmail.com>"
 
 # Overridable defaults
 ENV GERRIT_HOME=/var/gerrit \
-    GERRIT_VERSION=3.3.1 \
+    GERRIT_VERSION=3.3.2 \
     GERRIT_USER=gerrit
 
 ENV GERRIT_SITE=${GERRIT_HOME}/review_site \
