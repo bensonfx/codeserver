@@ -2,22 +2,22 @@
 set -e
 
 set_gerrit_config() {
-    gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/gerrit.config" "$@"
+    gosu ${GERRIT_USER} git config -f "${GERRIT_HOME}/etc/gerrit.config" "$@"
 }
 
 set_secure_config() {
-    gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/secure.config" "$@"
+    gosu ${GERRIT_USER} git config -f "${GERRIT_HOME}/etc/secure.config" "$@"
 }
 
 set_gitiles_config() {
-    gosu ${GERRIT_USER} git config -f "${GERRIT_SITE}/etc/gitiles.config" "$@"
+    gosu ${GERRIT_USER} git config -f "${GERRIT_HOME}/etc/gitiles.config" "$@"
 }
 
 install_plugin() {
     local plugin="$1.jar"
     [ -f "${GERRIT_HOME}/${plugin}" ] || return
-    if [ "$2" = "force" -o ! -f "${GERRIT_SITE}/plugins/${plugin}" ];then
-        gosu ${GERRIT_USER} cp -f "${GERRIT_HOME}/${plugin}" ${GERRIT_SITE}/plugins/
+    if [ "$2" = "force" -o ! -f "${GERRIT_HOME}/plugins/${plugin}" ];then
+        gosu ${GERRIT_USER} cp -f "${GERRIT_HOME}/${plugin}" ${GERRIT_HOME}/plugins/
     fi
 }
 wait_for_database() {
@@ -183,7 +183,7 @@ init_plugins() {
     set_gerrit_config plugins.allowRemoteAdmin true
 
     #Section plugin events-log
-    set_gerrit_config plugin.events-log.storeUrl "jdbc:h2:${GERRIT_SITE}/db/ChangeEvents"
+    set_gerrit_config plugin.events-log.storeUrl "jdbc:h2:${GERRIT_HOME}/db/ChangeEvents"
 
     #Section gitweb/gitiles
     [ -z "$GITWEB_TYPE" ] && export GITWEB_TYPE=gitweb
@@ -211,10 +211,18 @@ update_plugins() {
     [ "${AUTH_TYPE}" = 'OAUTH' ]  && install_plugin "gerrit-oauth-provider" force
 }
 
+update_gerrit_war() {
+    if [ ! -f "${GERRIT_WAR}" ]; then
+        echo "# downloading $(basename ${GERRIT_WAR}) ${GERRIT_VERSION} ..."
+        curl -L ${GERRIT_WAR_URL} -o ${GERRIT_WAR}
+    fi
+    fetch_gosu
+}
+
 do_init_gerrit() {
     gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init \
         --batch --no-auto-start --install-all-plugins \
-        -d "${GERRIT_SITE}" ${GERRIT_INIT_ARGS}
+        -d "${GERRIT_HOME}" ${GERRIT_INIT_ARGS}
     ret=$?
 
     #init java config
@@ -224,13 +232,13 @@ do_init_gerrit() {
 
     # redinex
     echo "Reindexing..."
-    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" reindex -d "${GERRIT_SITE}"
+    gosu ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" reindex -d "${GERRIT_HOME}"
     if [ $? -eq 0 ]; then
         #echo "Upgrading is OK. Writing versionfile ${GERRIT_VERSIONFILE}"
         echo "gerrit ${GERRIT_VERSION}:exec init success"
         gen_version
     else
-        cat "${GERRIT_SITE}/logs/error_log"
+        cat "${GERRIT_HOME}/logs/error_log"
         echo "gerrit ${GERRIT_VERSION} exec init failed"
     fi
     return $ret
@@ -239,7 +247,7 @@ do_init_gerrit() {
 init_gerrit_once() {
     # Initialize Gerrit
     echo "initialize gerrit ..."
-    if ! [ -f ${GERRIT_SITE}/etc/gerrit.config ];then
+    if ! [ -f ${GERRIT_HOME}/etc/gerrit.config ];then
         do_init_gerrit
         return $?
     fi
@@ -254,6 +262,7 @@ check_update_gerrit() {
     [ "${old_version}" = "${cur_version}" ] && return
     #there is new gerrit version, download it
     echo "Upgrading gerrit..."
+    update_gerrit_war
     do_init_gerrit
     if [ $? -ne 0 ]; then
         echo "Upgrading fail! Something wrong..."
@@ -264,14 +273,14 @@ check_update_gerrit() {
 }
 
 ############ main function start ############
-GERRIT_VERSIONFILE="${GERRIT_SITE}/VERSION"
+GERRIT_VERSIONFILE="${GERRIT_HOME}/VERSION"
 
 if [ -n "${JAVA_HEAPLIMIT}" ]; then
   JAVA_MEM_OPTIONS="-Xmx${JAVA_HEAPLIMIT}"
 fi
 
 # This obviously ensures the permissions are set correctly for when gerrit starts.
-find "${GERRIT_SITE}/" ! -user `id -u ${GERRIT_USER}` -exec chown ${GERRIT_USER} {} \;
+find "${GERRIT_HOME}/" ! -user `id -u ${GERRIT_USER}` -exec chown ${GERRIT_USER} {} \;
 
 # Initialize Gerrit
 init_gerrit_once
@@ -297,8 +306,11 @@ case "${DATABASE_TYPE}" in
     postgresql|mysql) wait_for_database ${DATABASE_ADDR} ${DATABASE_PORT} ;;
     *)          ;;
 esac
-
 check_update_gerrit
 
-echo "Starting Gerrit..."
-exec gosu ${GERRIT_USER} ${GERRIT_SITE}/bin/gerrit.sh ${GERRIT_START_ACTION:-daemon}
+if [ -z "$1" ];then
+    echo "Starting Gerrit..."
+    exec gosu ${GERRIT_USER} ${GERRIT_HOME}/bin/gerrit.sh ${GERRIT_START_ACTION:-daemon}
+else
+    exec $1
+fi

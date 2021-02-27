@@ -47,7 +47,6 @@ init_env() {
     if [ -z "$(which java)" ]; then
         apt-get install -yqq --no-install-recommends openjdk-11-jdk curl git openssh-client
     fi
-    clean
 }
 
 fetch_gosu() {
@@ -105,3 +104,4 @@ plugins)
     fetch_plugins
     ;;
 esac
+clean
