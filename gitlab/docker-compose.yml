@@ -90,7 +90,6 @@ services:
       # middlewares
       - "traefik.http.middlewares.custom-headers.headers.contentTypeNosniff=true
       - "traefik.http.middlewares.custom-headers.headers.browserXSSFilter=true
-      - "traefik.http.middlewares.custom-headers.headers.browserXSSFilter=true
       - "traefik.http.middlewares.custom-headers.headers.sslRedirect=true
       - "traefik.http.middlewares.behind-proxy-headers.headers.hostsProxyHeaders=X-Forwarded-For"
       # services
